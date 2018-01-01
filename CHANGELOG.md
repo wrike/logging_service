@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.0.3
+- Fix the "uses_dynamic_as_bottom" for the Dart-2.0
+
 ## 3.0.2
 - Just the version bumping
 
