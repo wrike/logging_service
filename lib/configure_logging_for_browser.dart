@@ -3,6 +3,8 @@ import 'dart:html' as html;
 
 import 'package:logging/logging.dart' as log;
 import 'package:logging_service/infinite_loop_protector.dart';
+import 'package:logging_service/src/js_console_proxy.dart';
+import 'package:logging_service/src/js_utils.dart';
 import 'package:sentry_client/sentry_client_browser.dart';
 import 'package:sentry_client/sentry_dsn.dart';
 
@@ -10,13 +12,14 @@ import 'logging_printer_for_browser.dart';
 import 'logging_saver_for_sentry.dart';
 import 'logging_service.dart';
 import 'sentry_pre_save_for_browser.dart';
-import 'src/logging_service_js_utils.dart';
+import 'src/js_pre_start_errors_list_utils.dart';
 
 typedef bool Protector(dynamic event);
 
 class ConfigureLoggingForBrowser {
   static const String LOG_URL_ARG_NAME = 'logging';
   static final Protector _defaultProtector = new InfiniteLoopProtector();
+  static final JsConsoleProxy _consoleProxy = new JsConsoleProxy();
 
   static void collectPreStartJsErrors(LoggingService loggingService) {
     if (loggingServiceJsPreStartErrorsList is List) {
@@ -40,7 +43,7 @@ class ConfigureLoggingForBrowser {
       }
 
       if (infiniteLoopProtector != null && !infiniteLoopProtector(error)) {
-        print('The handling of js-errors was disabled by the infinity-loop protector');
+        _consoleProxy.log('The handling of js-errors was disabled by the infinity-loop protector');
         return null;
       }
 

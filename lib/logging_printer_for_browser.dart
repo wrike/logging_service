@@ -1,27 +1,26 @@
-import 'dart:html' as html;
-
 import 'package:logging/logging.dart' as log;
+import 'package:logging_service/src/js_console_proxy.dart';
 import 'package:stack_trace/stack_trace.dart';
 
 class LoggingPrinterForBrowser {
   final bool _shouldTerseErrorWhenPrint;
-  final html.Window _window;
+  final JsConsoleProxy _consoleProxy;
 
-  LoggingPrinterForBrowser({bool shouldTerseErrorWhenPrint: false, html.Window window})
+  LoggingPrinterForBrowser({bool shouldTerseErrorWhenPrint: false, JsConsoleProxy consoleProxy})
       : _shouldTerseErrorWhenPrint = shouldTerseErrorWhenPrint,
-        _window = window ?? html.window;
+      _consoleProxy = consoleProxy ?? new JsConsoleProxy();
 
   void call(log.LogRecord rec) {
-    var msg = '[${new DateTime.now().toIso8601String()}] ${rec.loggerName}: ${rec.message}';
+    var msg = '[${rec.time.toIso8601String()}] ${rec.loggerName}: ${rec.message}';
 
     if (rec.error != null && rec.error.toString() != rec.message) {
       msg += '\n' + rec.error.toString();
     }
 
     if (rec.level == log.Level.SHOUT) {
-      _window.console.error(msg);
+      _consoleProxy.error(msg);
     } else {
-      _window.console.log(msg);
+      _consoleProxy.log(msg);
     }
 
     if (rec.stackTrace != null) {
@@ -36,11 +35,11 @@ class LoggingPrinterForBrowser {
           trace = new Trace.from(rec.stackTrace).terse.toString();
         }
       } else if (rec.stackTrace is Chain) {
-        _window.console.group('The chained stack trace: ');
+        _consoleProxy.group('The chained stack trace: ');
         for (final trace in (rec.stackTrace as Chain).traces) {
-          _window.console.log(_correctFormat(trace.original.toString()));
+          _consoleProxy.log(_correctFormat(trace.original.toString()));
         }
-        _window.console.groupEnd();
+        _consoleProxy.groupEnd();
       } else if (rec.stackTrace is Trace) {
         trace = _correctFormat((rec.stackTrace as Trace).original.toString());
       } else {
@@ -48,7 +47,7 @@ class LoggingPrinterForBrowser {
       }
 
       if (trace != null) {
-        _window.console.log(trace);
+        _consoleProxy.log(trace);
       }
     }
   }

@@ -52,6 +52,7 @@ class LoggingService {
     _logLevelsPerLogger[loggerName] = level;
   }
 
+  //TODO: move to the constructor
   void start({
     log.Level rootLogLevel: log.Level.SHOUT,
     log.Level savableLogLevel: log.Level.SHOUT,
