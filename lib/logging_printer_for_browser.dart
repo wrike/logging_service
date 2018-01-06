@@ -8,7 +8,7 @@ class LoggingPrinterForBrowser {
 
   LoggingPrinterForBrowser({bool shouldTerseErrorWhenPrint: false, JsConsoleProxy consoleProxy})
       : _shouldTerseErrorWhenPrint = shouldTerseErrorWhenPrint,
-      _consoleProxy = consoleProxy ?? new JsConsoleProxy();
+        _consoleProxy = consoleProxy ?? new JsConsoleProxy();
 
   void call(log.LogRecord rec) {
     var msg = '[${rec.time.toIso8601String()}] ${rec.loggerName}: ${rec.message}';
