@@ -16,21 +16,21 @@ class JsConsoleProxy {
   void _writeToConsole(_LogLevel level, String msg) {
     switch (level) {
       case _LogLevel.Error:
-        if (LoggingServiceOriginalConsoleMethods.error != null) {
+        if (_doesExist(LoggingServiceOriginalConsoleMethods.error)) {
           LoggingServiceOriginalConsoleMethods.error(msg);
         } else {
           html.window.console.error(msg);
         }
         break;
       case _LogLevel.Info:
-        if (LoggingServiceOriginalConsoleMethods.info != null) {
+        if (_doesExist(LoggingServiceOriginalConsoleMethods.info)) {
           LoggingServiceOriginalConsoleMethods.info(msg);
         } else {
           html.window.console.info(msg);
         }
         break;
       case _LogLevel.Log:
-        if (LoggingServiceOriginalConsoleMethods.log != null) {
+        if (_doesExist(LoggingServiceOriginalConsoleMethods.log)) {
           LoggingServiceOriginalConsoleMethods.log(msg);
         } else {
           html.window.console.log(msg);
@@ -38,6 +38,8 @@ class JsConsoleProxy {
         break;
     }
   }
+
+  bool _doesExist(dynamic method) => loggingServiceOriginalConsoleContainer != null && method != null;
 }
 
 enum _LogLevel { Error, Info, Log }
