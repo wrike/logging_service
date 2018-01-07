@@ -1,5 +1,9 @@
+@JS()
+library runtime_js_logs_test;
+
 import 'dart:html' as html;
 
+import 'package:js/js.dart';
 import 'package:logging/logging.dart' as log;
 import 'package:logging_service/logging_printer_for_browser.dart';
 import 'package:logging_service/logging_service.dart';
@@ -9,6 +13,7 @@ import 'package:test/test.dart';
 void main() {
   group('errors from js should', () {
     test('be proxied to the Dart printer', () {
+      setUpPreconditions();
       final loggingPrinterForBrowserMock = new LoggingPrinterForBrowserMock();
 
       print('use "print()" from Dart');
@@ -46,9 +51,17 @@ void main() {
           .firstWhere((log.LogRecord record) => record.message == 'use "window.console.log" from Dart');
       expect(consoleLogFromDart.level, log.Level.INFO);
       expect(consoleLogFromDart.loggerName, JsToDartLogsLoggerName);
+
+      cleanUp();
     });
   });
 }
+
+@JS('_cleanUp')
+external void cleanUp();
+
+@JS('_setUpPreconditions')
+external void setUpPreconditions();
 
 class LoggingPrinterForBrowserMock implements LoggingPrinterForBrowser {
   // The mockito does not work correct with callable classes!

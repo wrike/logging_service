@@ -6,26 +6,34 @@
   <link rel="x-dart-test" href="runtime_js_logs_test.dart"/>
   <script src="packages/logging_service/runtime_js_to_dart_logs_writer_code.js"></script>
   <script>
-    function _aMethod() {
-      _bMethod();
-    }
+    window._setUpPreconditions = function () {
+      window.loggingServiceEnableJsToDartLogsTransferring();
 
-    function _bMethod() {
-      _nonexistentMethod();
-    }
+      function _aMethod() {
+        _bMethod();
+      }
 
-    try {
-      _aMethod();
+      function _bMethod() {
+        _nonexistentMethod();
+      }
 
-    } catch (e) {
-      console.error('Exception note', e);
-    }
+      try {
+        _aMethod();
 
-    console.info({});
-    console.info({error: 'some error-like object'});
+      } catch (e) {
+        console.error('Exception note', e);
+      }
+
+      console.info({});
+      console.info({error: 'some error-like object'});
+    };
+
+    window._cleanUp = function () {
+      window.loggingServiceDisableJsToDartLogsTransferring();
+    };
   </script>
   <script src="packages/test/dart.js"></script>
-  <script type="application/dart" src="runtime_js_logs_test_run.dart"></script>
+  <script type="application/dart" src="runtime_js_logs_test.dart"></script>
   <script src="packages/browser/dart.js"></script>
 </head>
 <body>

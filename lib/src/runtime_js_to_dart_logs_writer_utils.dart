@@ -12,6 +12,15 @@ external set loggingServiceJsToDartLogsWriter(LogWriter writer);
 @JS('loggingServiceLogWriteBuffer')
 external List<List<dynamic>> get loggingServiceLogWriteBuffer;
 
+@JS('loggingServiceOriginalConsoleMethods')
+external dynamic get loggingServiceOriginalConsoleContainer;
+
+@JS('loggingServiceDisableJsToDartLogsTransferring')
+external void loggingServiceDisableJsToDartLogsTransferring();
+
+@JS('loggingServiceEnableJsToDartLogsTransferring')
+external void loggingServiceEnableJsToDartLogsTransferring();
+
 typedef void LogWriter(List<dynamic> args);
 
 @JS('loggingServiceOriginalConsoleMethods')
@@ -21,6 +30,3 @@ class LoggingServiceOriginalConsoleMethods {
   external static void info(String msg);
   external static void log(String msg);
 }
-
-@JS('loggingServiceOriginalConsoleMethods')
-external dynamic get loggingServiceOriginalConsoleContainer;
