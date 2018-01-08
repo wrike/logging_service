@@ -17,7 +17,7 @@ class LoggingPrinterForBrowser {
       msg += '\n' + rec.error.toString();
     }
 
-    if (rec.level == log.Level.SHOUT) {
+    if (rec.level == log.Level.SEVERE) {
       _consoleProxy.error(msg);
     } else {
       _consoleProxy.log(msg);

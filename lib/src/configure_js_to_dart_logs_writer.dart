@@ -22,7 +22,7 @@ void configureJsToDartLogsWriter(LoggingService loggingService) {
     final level = (() {
       switch (args.removeAt(0) as String) {
         case 'error':
-          return log.Level.SHOUT;
+          return log.Level.SEVERE;
         case 'info':
           return log.Level.WARNING;
         case 'log':

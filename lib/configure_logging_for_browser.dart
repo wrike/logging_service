@@ -24,7 +24,7 @@ class ConfigureLoggingForBrowser {
   static void collectPreStartJsErrors(LoggingService loggingService) {
     if (loggingServiceJsPreStartErrorsList is List) {
       loggingServiceJsPreStartErrorsList.forEach((error) {
-        loggingService.handleLogRecord(new log.LogRecord(log.Level.SHOUT, error.error.toString(),
+        loggingService.handleLogRecord(new log.LogRecord(log.Level.SEVERE, error.error.toString(),
             'jsPreStartUnhandledErrorLogger', error.error, new StackTrace.fromString(error.error.stack)));
       });
       loggingServiceIsJsPreStartErrorSavingEnabled = false;
@@ -56,10 +56,10 @@ class ConfigureLoggingForBrowser {
           stackTrace = (error.error as JsError).stack;
         }
 
-        loggingService.handleLogRecord(new log.LogRecord(log.Level.SHOUT, error.error.toString(),
+        loggingService.handleLogRecord(new log.LogRecord(log.Level.SEVERE, error.error.toString(),
             'jsUnhandledErrorLogger', error, new StackTrace.fromString(stackTrace)));
       } else {
-        loggingService.handleLogRecord(new log.LogRecord(log.Level.SHOUT, error.toString(), 'jsUnhandledErrorLogger',
+        loggingService.handleLogRecord(new log.LogRecord(log.Level.SEVERE, error.toString(), 'jsUnhandledErrorLogger',
             error, new StackTrace.fromString(error.toString())));
       }
     });

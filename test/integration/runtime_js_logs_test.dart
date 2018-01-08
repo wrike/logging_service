@@ -29,7 +29,7 @@ void main() {
       final errorLogFromJs = loggingPrinterForBrowserMock.mf_captured
           .firstWhere((log.LogRecord record) => record.message == 'Exception note');
       expect(errorLogFromJs.error.toString(), 'ReferenceError: _nonexistentMethod is not defined');
-      expect(errorLogFromJs.level, log.Level.SHOUT); //TODO: change to Severe
+      expect(errorLogFromJs.level, log.Level.SEVERE);
       expect(errorLogFromJs.loggerName, JsToDartLogsLoggerName);
 
       final infoLogFromJs1 =
