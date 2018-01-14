@@ -3,6 +3,7 @@ import 'dart:html' as html;
 
 import 'package:logging/logging.dart' as log;
 import 'package:logging_service/infinite_loop_protector.dart';
+import 'package:logging_service/src/configure_js_to_dart_logs_writer.dart';
 import 'package:logging_service/src/js_console_proxy.dart';
 import 'package:logging_service/src/js_utils.dart';
 import 'package:sentry_client/sentry_client_browser.dart';
@@ -129,5 +130,6 @@ class ConfigureLoggingForBrowser {
     listenJsErrors(loggingService,
         preventDefault: preventDefaultJsError, infiniteLoopProtector: jsInfiniteLoopProtector);
     collectPreStartJsErrors(loggingService);
+    configureJsToDartLogsWriter(loggingService);
   }
 }
