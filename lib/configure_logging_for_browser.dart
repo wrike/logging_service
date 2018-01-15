@@ -130,6 +130,6 @@ class ConfigureLoggingForBrowser {
     listenJsErrors(loggingService,
         preventDefault: preventDefaultJsError, infiniteLoopProtector: jsInfiniteLoopProtector);
     collectPreStartJsErrors(loggingService);
-    configureJsToDartLogsWriter(loggingService);
+    //configureJsToDartLogsWriter(loggingService);
   }
 }
