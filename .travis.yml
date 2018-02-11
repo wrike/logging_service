@@ -1,5 +1,7 @@
 language: dart
-sudo: false
+sudo: required
+addons:
+  chrome: stable
 matrix:
   include:
     - dart: dev
@@ -11,8 +13,7 @@ matrix:
         test: --platform firefox -j 1
     - dart: dev
       dart_task:
-        test: --platform dartium
-        install_dartium: true
+        test: --platform chrome
     - dart: stable
       script:
         - pub run dart_dev analyze
@@ -21,10 +22,6 @@ matrix:
         test: --platform dartium
         install_dartium: true
     - dart: 1.22.1
-      dart_task:
-        test: --platform dartium
-        install_dartium: true
-    - dart: 1.21.1
       dart_task:
         test: --platform dartium
         install_dartium: true

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>http test</title>
+  <link rel="x-dart-test" href="runtime_js_logs_test.dart"/>
+  <script src="packages/logging_service/runtime_js_to_dart_logs_writer_code.js"></script>
+  <script>
+    window._setUpPreconditions = function () {
+      window.loggingServiceEnableJsToDartLogsTransferring();
+
+      function _aMethod() {
+        _bMethod();
+      }
+
+      function _bMethod() {
+        _nonexistentMethod();
+      }
+
+      try {
+        _aMethod();
+
+      } catch (e) {
+        console.error('Exception note', e);
+      }
+
+      console.info({});
+      console.info({error: 'some error-like object'});
+    };
+
+    window._cleanUp = function () {
+      window.loggingServiceDisableJsToDartLogsTransferring();
+    };
+  </script>
+  <script src="packages/test/dart.js"></script>
+  <script type="application/dart" src="runtime_js_logs_test.dart"></script>
+  <script src="packages/browser/dart.js"></script>
+</head>
+<body>
+
+</body>
+</html>

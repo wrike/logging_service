@@ -31,7 +31,7 @@ class LoggingService {
       }
     }
 
-    if (rec.level >= _savableLogLevel) {
+    if (rec.level >= _savableLogLevel && rec.level != log.Level.SHOUT) {
       for (final saver in _loggingSavers) {
         saver(rec);
       }
@@ -40,7 +40,7 @@ class LoggingService {
 
   T runProtected<T>(T callback(), {bool reThrowErrors: false, bool when: true}) {
     return Chain.capture<T>(callback, when: when, onError: (dynamic error, Chain chain) {
-      handleLogRecord(new log.LogRecord(log.Level.SHOUT, error.toString(), DART_CAPTURED_LOGGER_NAME, error, chain));
+      handleLogRecord(new log.LogRecord(log.Level.SEVERE, error.toString(), DART_CAPTURED_LOGGER_NAME, error, chain));
 
       if (reThrowErrors) {
         throw error;
@@ -52,10 +52,11 @@ class LoggingService {
     _logLevelsPerLogger[loggerName] = level;
   }
 
+  //TODO: move to the constructor
   void start({
-    log.Level rootLogLevel: log.Level.SHOUT,
-    log.Level savableLogLevel: log.Level.SHOUT,
-    log.Level recordStackTraceAtLevel: log.Level.SHOUT,
+    log.Level rootLogLevel: log.Level.SEVERE,
+    log.Level savableLogLevel: log.Level.SEVERE,
+    log.Level recordStackTraceAtLevel: log.Level.SEVERE,
   }) {
     if (_isServiceStarted) {
       throw new Exception('The service is already started');
