@@ -3,7 +3,6 @@ import 'dart:html' as html;
 
 import 'package:logging/logging.dart' as log;
 import 'package:logging_service/infinite_loop_protector.dart';
-import 'package:logging_service/src/configure_js_to_dart_logs_writer.dart';
 import 'package:logging_service/src/js_console_proxy.dart';
 import 'package:logging_service/src/js_utils.dart';
 import 'package:sentry_client/sentry_client_browser.dart';
@@ -68,6 +67,7 @@ class ConfigureLoggingForBrowser {
 
   static void setLogLevelsFromUrl(LoggingService loggingService, {html.Window window}) {
     window = window ?? html.window;
+    // ignore: strong_mode_uses_dynamic_as_bottom
     final _levelNames = new Map.fromIterable(log.Level.LEVELS, key: (log.Level l) => l.name, value: (log.Level l) => l);
 
     final applyLogLevel = () {
@@ -130,6 +130,5 @@ class ConfigureLoggingForBrowser {
     listenJsErrors(loggingService,
         preventDefault: preventDefaultJsError, infiniteLoopProtector: jsInfiniteLoopProtector);
     collectPreStartJsErrors(loggingService);
-    //configureJsToDartLogsWriter(loggingService);
   }
 }
