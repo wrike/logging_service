@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.1.0
+- Add js to dart logging
+
 ## 3.0.3
 - Fix the "uses_dynamic_as_bottom" for the Dart-2.0
 
