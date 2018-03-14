@@ -1,16 +1,10 @@
 @JS()
 library js_utils;
 
-import 'dart:convert';
-
 import 'package:js/js.dart';
 
+//TODO: remove (it does not work)
 bool isItJsObject(dynamic obj) => jsonStringify(obj).startsWith('{');
-
-dynamic jsify(Object o) => jsonParse(JSON.encode(o));
-
-@JS('JSON.parse')
-external dynamic jsonParse(String json);
 
 @JS('JSON.stringify')
 external String jsonStringify(dynamic obj);
