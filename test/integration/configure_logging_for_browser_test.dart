@@ -84,10 +84,17 @@ stackTrace: Exception
       var rec = verify(loggingServiceMock.handleLogRecord(captureAny)).captured.first as log.LogRecord;
       expect(rec.message, 'nestedTestMsg');
     });
+
+    test('log message even if an error-event has an incorrect type', () {
+      ConfigureLoggingForBrowser.listenJsErrors(loggingServiceMock, window: windowMock);
+
+      onErrorStreamController.add(null);
+
+      // ignore: argument_type_not_assignable
+      verify(loggingServiceMock.handleLogRecord(captureAny)).called(1);
+    });
   });
 }
-
-class ErrorEventMock extends Mock implements html.ErrorEvent {}
 
 class LoggingServiceMock extends Mock implements LoggingService {}
 
