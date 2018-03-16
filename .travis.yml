@@ -21,10 +21,6 @@ matrix:
       dart_task:
         test: --platform dartium
         install_dartium: true
-    - dart: 1.22.1
-      dart_task:
-        test: --platform dartium
-        install_dartium: true
     - dart: stable
       with_content_shell: true
       before_install:
