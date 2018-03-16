@@ -14,6 +14,8 @@ import 'logging_service.dart';
 import 'sentry_pre_save_for_browser.dart';
 import 'src/js_pre_start_errors_list_utils.dart';
 
+const _json = const JsonCodec();
+
 typedef bool Protector(dynamic event);
 
 class ConfigureLoggingForBrowser {
@@ -121,7 +123,7 @@ class ConfigureLoggingForBrowser {
       if (query.isNotEmpty && query.containsKey(LOG_URL_ARG_NAME)) {
         final argsRaw = query[LOG_URL_ARG_NAME];
 
-        final args = JSON.decode(argsRaw) as Map<String, String>;
+        final args = _json.decode(argsRaw) as Map<String, String>;
 
         args.forEach((String loggerName, String level) {
           if (_levelNames.containsKey(level)) {
