@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.1.1
+- Fix a type error inside the window.onError callback #4
+
 ## 3.1.0
 - Add js to dart logging
 

@@ -48,8 +48,9 @@ class InfiniteLoopProtector {
     return true;
   }
 
+  //TODO: update constant value after the Dart 2.0 release
   double _getSpeed() =>
-      _recordTimes.length / ((_recordTimes.last - _recordTimes.first) / Duration.MILLISECONDS_PER_MINUTE);
+      _recordTimes.length / ((_recordTimes.last - _recordTimes.first) / 60000 /*Duration.MILLISECONDS_PER_MINUTE)*/);
 
   bool _isInsideOfControl() => _speedControlInterval <= 0 || _recordTimes.length > _speedControlInterval;
 

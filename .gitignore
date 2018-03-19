@@ -2,6 +2,8 @@
 ### Dart template
 # See https://www.dartlang.org/tools/private-files.html
 
+.dart_tool/
+
 # Files and directories created by pub
 
 # SDK 1.20 and later (no longer creates packages directories)

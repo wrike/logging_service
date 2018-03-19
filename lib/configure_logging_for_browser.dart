@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'dart:html' as html;
+import 'dart:js';
 
 import 'package:logging/logging.dart' as log;
 import 'package:logging_service/infinite_loop_protector.dart';
 import 'package:logging_service/src/js_console_proxy.dart';
-import 'package:logging_service/src/js_utils.dart';
 import 'package:sentry_client/sentry_client_browser.dart';
 import 'package:sentry_client/sentry_dsn.dart';
 
@@ -13,6 +13,8 @@ import 'logging_saver_for_sentry.dart';
 import 'logging_service.dart';
 import 'sentry_pre_save_for_browser.dart';
 import 'src/js_pre_start_errors_list_utils.dart';
+
+const _json = const JsonCodec();
 
 typedef bool Protector(dynamic event);
 
@@ -33,11 +35,27 @@ class ConfigureLoggingForBrowser {
   }
 
   static void listenJsErrors(LoggingService loggingService,
-      {bool preventDefault: true, html.Window window, Protector infiniteLoopProtector}) {
+      {bool preventDefault, html.Window window, Protector infiniteLoopProtector}) {
+    var isDevMode = false;
+    assert(isDevMode = true);
+
+    preventDefault = preventDefault ?? !isDevMode;
     window = window ?? html.window;
     infiniteLoopProtector = infiniteLoopProtector ?? _defaultProtector;
 
     window.onError.listen((html.Event error) {
+      if (error is! html.Event) {
+        loggingService.handleLogRecord(
+          new log.LogRecord(
+            log.Level.SEVERE,
+            'window.onError was called with incorrect arguments, the error event: ${error.toString()}',
+            'jsUnhandledErrorLogger',
+            error,
+          ),
+        );
+        return null;
+      }
+
       if (preventDefault) {
         error.preventDefault();
       }
@@ -47,20 +65,48 @@ class ConfigureLoggingForBrowser {
         return null;
       }
 
-      if (error is html.ErrorEvent) {
-        String stackTrace;
+      try {
+        String errorMsg;
 
-        if (error.error is String) {
-          stackTrace = error.error.toString();
-        } else {
-          stackTrace = (error.error as JsError).stack;
+        var jsError = new JsObject.fromBrowserObject(error);
+
+        if (jsError['message'] != null && jsError['message'].toString().isNotEmpty) {
+          errorMsg = jsError['message'].toString();
         }
 
-        loggingService.handleLogRecord(new log.LogRecord(log.Level.SEVERE, error.error.toString(),
-            'jsUnhandledErrorLogger', error, new StackTrace.fromString(stackTrace)));
-      } else {
-        loggingService.handleLogRecord(new log.LogRecord(log.Level.SEVERE, error.toString(), 'jsUnhandledErrorLogger',
-            error, new StackTrace.fromString(error.toString())));
+        StackTrace stackTrace;
+        if (jsError['error'] != null) {
+          var nestedJsError = new JsObject.fromBrowserObject(jsError['error']);
+          if (nestedJsError['stack'] != null) {
+            stackTrace = new StackTrace.fromString(nestedJsError['stack'].toString());
+          }
+          if (errorMsg == null && nestedJsError['message'] != null) {
+            errorMsg = nestedJsError['message'].toString();
+          }
+        }
+
+        if (errorMsg == null) {
+          errorMsg = error.toString();
+        }
+
+        loggingService.handleLogRecord(
+          new log.LogRecord(
+            log.Level.SEVERE,
+            errorMsg,
+            'jsUnhandledErrorLogger',
+            error,
+            stackTrace,
+          ),
+        );
+      } catch (e) {
+        loggingService.handleLogRecord(
+          new log.LogRecord(
+            log.Level.SEVERE,
+            'The error from js was not parsed correctly, the error: ${error.toString()}',
+            'jsUnhandledErrorLogger',
+            e,
+          ),
+        );
       }
     });
   }
@@ -77,7 +123,7 @@ class ConfigureLoggingForBrowser {
       if (query.isNotEmpty && query.containsKey(LOG_URL_ARG_NAME)) {
         final argsRaw = query[LOG_URL_ARG_NAME];
 
-        final args = JSON.decode(argsRaw) as Map<String, String>;
+        final args = _json.decode(argsRaw) as Map<String, String>;
 
         args.forEach((String loggerName, String level) {
           if (_levelNames.containsKey(level)) {

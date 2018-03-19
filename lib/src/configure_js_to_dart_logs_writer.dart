@@ -12,6 +12,7 @@ import 'package:logging_service/src/runtime_js_to_dart_logs_writer_utils.dart';
 const String JsToDartLogsLoggerName = 'FromWindowConsole';
 
 void configureJsToDartLogsWriter(LoggingService loggingService) {
+  //TODO: refactor with import 'dart:js';
   loggingServiceJsToDartLogsWriter = allowInterop((List<dynamic> args) {
     if (args.isEmpty) {
       return null;

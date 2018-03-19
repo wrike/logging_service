@@ -3,6 +3,7 @@ library js_utils;
 
 import 'package:js/js.dart';
 
+//TODO: remove (it does not work)
 bool isItJsObject(dynamic obj) => jsonStringify(obj).startsWith('{');
 
 @JS('JSON.stringify')

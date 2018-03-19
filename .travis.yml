@@ -7,7 +7,8 @@ matrix:
     - dart: dev
       script:
         - pub run dart_dev analyze
-        - pub run dart_dev format --check
+        #TODO: disabled because we can not resolve dependencies with dart_style: ^1.0.7
+        #- pub run dart_dev format --check
     - dart: dev
       dart_task:
         test: --platform firefox -j 1
@@ -18,10 +19,6 @@ matrix:
       script:
         - pub run dart_dev analyze
     - dart: stable
-      dart_task:
-        test: --platform dartium
-        install_dartium: true
-    - dart: 1.22.1
       dart_task:
         test: --platform dartium
         install_dartium: true
