@@ -19,6 +19,8 @@ dev_dependencies:
   mockito: ^2.0.0
   quiver: '>=0.21.4 < 1.0.0'
   dart_dev: ^1.7.2
+  #TODO: disabled because we can not resolve dependencies with it
+  #dart_style: ^1.0.7
 
 transformers:
   - test/pub_serve:
