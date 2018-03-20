@@ -24,10 +24,22 @@ class ConfigureLoggingForBrowser {
   static final JsConsoleProxy _consoleProxy = new JsConsoleProxy();
 
   static void collectPreStartJsErrors(LoggingService loggingService) {
+    print('### collectPreStartJsErrors');
     if (loggingServiceJsPreStartErrorsList is List) {
       loggingServiceJsPreStartErrorsList.forEach((error) {
-        loggingService.handleLogRecord(new log.LogRecord(log.Level.SEVERE, error.error.toString(),
-            'jsPreStartUnhandledErrorLogger', error.error, new StackTrace.fromString(error.error.stack)));
+        if (error is! html.Event) {
+          loggingService.handleLogRecord(
+            new log.LogRecord(
+              log.Level.SEVERE,
+              'collectPreStartJsErrors: the error event has incorrect type: ${error.runtimeType}/${error.toString()}',
+              'jsPreStartUnhandledErrorLogger',
+              error,
+            ),
+          );
+          return null;
+        }
+
+        _handleJsError(error as html.Event, loggingService, 'jsPreStartUnhandledErrorLogger');
       });
       loggingServiceIsJsPreStartErrorSavingEnabled = false;
       loggingServiceJsPreStartErrorsList.clear();
@@ -40,6 +52,7 @@ class ConfigureLoggingForBrowser {
     infiniteLoopProtector = infiniteLoopProtector ?? _defaultProtector;
 
     window.onError.listen((html.Event error) {
+      print('### window.onError->');
       if (error is! html.Event) {
         loggingService.handleLogRecord(
           new log.LogRecord(
@@ -53,6 +66,7 @@ class ConfigureLoggingForBrowser {
       }
 
       if (preventDefault) {
+        print('### preventDefault!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
         error.preventDefault();
       }
 
@@ -61,49 +75,7 @@ class ConfigureLoggingForBrowser {
         return null;
       }
 
-      try {
-        String errorMsg;
-
-        var jsError = new JsObject.fromBrowserObject(error);
-
-        if (jsError['message'] != null && jsError['message'].toString().isNotEmpty) {
-          errorMsg = jsError['message'].toString();
-        }
-
-        StackTrace stackTrace;
-        if (jsError['error'] != null) {
-          var nestedJsError = new JsObject.fromBrowserObject(jsError['error']);
-          if (nestedJsError['stack'] != null) {
-            stackTrace = new StackTrace.fromString(nestedJsError['stack'].toString());
-          }
-          if (errorMsg == null && nestedJsError['message'] != null) {
-            errorMsg = nestedJsError['message'].toString();
-          }
-        }
-
-        if (errorMsg == null) {
-          errorMsg = error.toString();
-        }
-
-        loggingService.handleLogRecord(
-          new log.LogRecord(
-            log.Level.SEVERE,
-            errorMsg,
-            'jsUnhandledErrorLogger',
-            error,
-            stackTrace,
-          ),
-        );
-      } catch (e) {
-        loggingService.handleLogRecord(
-          new log.LogRecord(
-            log.Level.SEVERE,
-            'The error from js was not parsed correctly, the error: ${error.toString()}',
-            'jsUnhandledErrorLogger',
-            e,
-          ),
-        );
-      }
+      _handleJsError(error, loggingService, 'jsUnhandledErrorLogger');
     });
   }
 
@@ -172,5 +144,64 @@ class ConfigureLoggingForBrowser {
     listenJsErrors(loggingService,
         preventDefault: preventDefaultJsError, infiniteLoopProtector: jsInfiniteLoopProtector);
     collectPreStartJsErrors(loggingService);
+  }
+
+  static void _handleJsError(html.Event error, LoggingService loggingService, String loggerName) {
+    print('### _handleJsError->');
+    print('### error.runtimeType: ${error.runtimeType}');
+    print('### error.toString(): ${error.toString()}');
+    if (error is html.ErrorEvent) {
+      print('### error.error.runtimeType: ${error.error.runtimeType}');
+      print('### error.error.toString(): ${error.error.toString()}');
+      print('### error.message: ${error.message}');
+      print('### error.lineno: ${error.lineno}');
+      print('### error.filename: ${error.filename}');
+    }
+
+    try {
+      String errorMsg;
+      StackTrace stackTrace;
+
+      if (error is html.ErrorEvent) {
+        if (error.message != null && error.message.toString().isNotEmpty) {
+          errorMsg = error.message.toString();
+        }
+
+        //TODO: there is no other way to determine whether the object is Js-object of Dart-object
+        if (error.error != null && error.error.runtimeType.toString() == 'JSObjectImpl') {
+          var nestedJsError = new JsObject.fromBrowserObject(error.error);
+          if (nestedJsError['stack'] != null) {
+            stackTrace = new StackTrace.fromString(nestedJsError['stack'].toString());
+          }
+          if (errorMsg == null && nestedJsError['message'] != null) {
+            errorMsg = nestedJsError['message'].toString();
+          }
+        }
+      }
+
+      if (errorMsg == null) {
+        errorMsg = error.toString();
+      }
+
+      loggingService.handleLogRecord(
+        new log.LogRecord(
+          log.Level.SEVERE,
+          errorMsg,
+          loggerName,
+          error,
+          stackTrace,
+        ),
+      );
+    } catch (e) {
+      print('### !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
+      loggingService.handleLogRecord(
+        new log.LogRecord(
+          log.Level.SEVERE,
+          'The error from js was not parsed correctly, the error: ${error.toString()}',
+          loggerName,
+          e,
+        ),
+      );
+    }
   }
 }
