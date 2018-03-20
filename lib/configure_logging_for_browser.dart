@@ -35,11 +35,7 @@ class ConfigureLoggingForBrowser {
   }
 
   static void listenJsErrors(LoggingService loggingService,
-      {bool preventDefault, html.Window window, Protector infiniteLoopProtector}) {
-    var isDevMode = false;
-    assert(isDevMode = true);
-
-    preventDefault = preventDefault ?? !isDevMode;
+      {bool preventDefault: false, html.Window window, Protector infiniteLoopProtector}) {
     window = window ?? html.window;
     infiniteLoopProtector = infiniteLoopProtector ?? _defaultProtector;
 
