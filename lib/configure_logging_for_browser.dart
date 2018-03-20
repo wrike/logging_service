@@ -1,5 +1,3 @@
-// ignore: import_internal_library
-import 'dart:_interceptors';
 import 'dart:convert';
 import 'dart:html' as html;
 import 'dart:js';
@@ -156,7 +154,7 @@ class ConfigureLoggingForBrowser {
       print('### error.error.runtimeType: ${error.error.runtimeType}');
       print('### error.error.toString(): ${error.error.toString()}');
       print('### error.error is JavaScriptObject: ${error.error is JavaScriptObject}');
-      print('### error.error is JSObject: ${error.error is JSObject}');
+      //print('### error.error is JSObject: ${error.error is JSObject}');
       print('### error.message: ${error.message}');
       print('### error.lineno: ${error.lineno}');
       print('### error.filename: ${error.filename}');
