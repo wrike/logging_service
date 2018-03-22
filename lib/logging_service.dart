@@ -1,4 +1,7 @@
+import 'dart:html' as html;
+
 import 'package:logging/logging.dart' as log;
+import 'package:logging_service/protector.dart';
 import 'package:stack_trace/stack_trace.dart';
 
 typedef void LoggingHandler(log.LogRecord rec);
@@ -40,12 +43,18 @@ class LoggingService {
 
   T runProtected<T>(T callback(), {bool reThrowErrors: true, bool when: true}) {
     return Chain.capture<T>(callback, when: when, onError: (dynamic error, Chain chain) {
+      print('### Chain.capture-> ${error.hashCode}');
       handleLogRecord(new log.LogRecord(log.Level.SEVERE, error.toString(), DART_CAPTURED_LOGGER_NAME, error, chain));
 
-      if (reThrowErrors) {
-        print('### rethrow');
-        throw error;
-      }
+      //if (reThrowErrors) {
+        //if (RepeatProtector.shouldBeHandled(error)) {
+          print('### rethrow');
+          html.window.console.error(error.toString());
+          html.window.console.error(chain.toString());
+          html.window.console.error(error.toString() + '\r\n' + chain.toString());
+          //throw error;
+        //}
+      //}
     });
   }
 

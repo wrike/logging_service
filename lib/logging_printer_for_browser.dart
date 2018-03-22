@@ -12,15 +12,16 @@ class LoggingPrinterForBrowser {
 
   void call(log.LogRecord rec) {
     print('### Log: ${rec.sequenceNumber}');
-    print('### rec.level: ${rec.level}');
-    print('### rec.loggerName: ${rec.loggerName}');
-    print('### rec.time: ${rec.time}');
-    print('### rec.message: ${rec.message}');
-    print('### rec.error: ${rec.error}');
-    print('### rec.error.runtimeType: ${rec.error.runtimeType}');
-    print('### rec.stackTrace: ${rec.stackTrace}');
-    print('### rec.stackTrace.runtimeType: ${rec.stackTrace.runtimeType}');
-
+    if (rec.level == log.Level.SEVERE) {
+      print('### rec.level: ${rec.level}');
+      print('### rec.loggerName: ${rec.loggerName}');
+      print('### rec.time: ${rec.time}');
+      print('### rec.message: ${rec.message}');
+      print('### rec.error: ${rec.error}');
+      print('### rec.error.runtimeType: ${rec.error.runtimeType}');
+      print('### rec.stackTrace: ${rec.stackTrace}');
+      print('### rec.stackTrace.runtimeType: ${rec.stackTrace.runtimeType}');
+    }
 
 //    var msg = '[${rec.time.toIso8601String()}] ${rec.loggerName}: ${rec.message}';
 //

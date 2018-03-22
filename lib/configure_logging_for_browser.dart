@@ -4,6 +4,7 @@ import 'dart:js';
 
 import 'package:logging/logging.dart' as log;
 import 'package:logging_service/infinite_loop_protector.dart';
+import 'package:logging_service/protector.dart';
 import 'package:logging_service/src/js_console_proxy.dart';
 import 'package:sentry_client/sentry_client_browser.dart';
 import 'package:sentry_client/sentry_dsn.dart';
@@ -50,32 +51,42 @@ class ConfigureLoggingForBrowser {
       {bool preventDefault: false, html.Window window, Protector infiniteLoopProtector}) {
     window = window ?? html.window;
     infiniteLoopProtector = infiniteLoopProtector ?? _defaultProtector;
+    print('### listenJsErrors:preventDefault: ${preventDefault}');
 
     window.onError.listen((html.Event error) {
-      print('### window.onError->');
-      if (error is! html.Event) {
-        loggingService.handleLogRecord(
-          new log.LogRecord(
-            log.Level.SEVERE,
-            'window.onError was called with incorrect arguments, the error event: ${error.toString()}',
-            'jsUnhandledErrorLogger',
-            error,
-          ),
-        );
-        return null;
-      }
+      print('### window.onError-> error.hashCode: ${error.hashCode}');
+      print('### error.runtimeType: ${error.runtimeType}');
 
-      if (preventDefault) {
-        print('### preventDefault!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
-        error.preventDefault();
-      }
+      html.window.console.error(error.toString());
 
-      if (infiniteLoopProtector != null && !infiniteLoopProtector(error)) {
-        _consoleProxy.log('The handling of js-errors was disabled by the infinity-loop protector');
-        return null;
-      }
+//      if (!RepeatProtector.shouldBeHandled(error)) {
+//        print('### listenJsErrors->!RepeatProtector.shouldBeHandled(error)');
+//        return null;
+//      }
 
-      _handleJsError(error, loggingService, 'jsUnhandledErrorLogger');
+//      if (error is! html.Event) {
+//        loggingService.handleLogRecord(
+//          new log.LogRecord(
+//            log.Level.SEVERE,
+//            'window.onError was called with incorrect arguments, the error event: ${error.toString()}',
+//            'jsUnhandledErrorLogger',
+//            error,
+//          ),
+//        );
+//        return null;
+//      }
+
+//      if (preventDefault) {
+//        print('### preventDefault!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
+//        error.preventDefault();
+//      }
+
+//      if (infiniteLoopProtector != null && !infiniteLoopProtector(error)) {
+//        _consoleProxy.log('The handling of js-errors was disabled by the infinity-loop protector');
+//        return null;
+//      }
+
+//      _handleJsError(error, loggingService, 'jsUnhandledErrorLogger');
     });
   }
 
@@ -143,7 +154,7 @@ class ConfigureLoggingForBrowser {
     setLogLevelsFromUrl(loggingService);
     listenJsErrors(loggingService,
         preventDefault: preventDefaultJsError, infiniteLoopProtector: jsInfiniteLoopProtector);
-    collectPreStartJsErrors(loggingService);
+//    collectPreStartJsErrors(loggingService);
   }
 
   static void _handleJsError(html.Event error, LoggingService loggingService, String loggerName) {
