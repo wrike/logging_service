@@ -153,7 +153,8 @@ class ConfigureLoggingForBrowser {
     if (error is html.ErrorEvent) {
       print('### error.error.runtimeType: ${error.error.runtimeType}');
       print('### error.error.toString(): ${error.error.toString()}');
-      print('### error.error is JavaScriptObject: ${error.error is JavaScriptObject}');
+      //print('### error.error is JavaScriptObject: ${error.error is JavaScriptObject}');
+      print('### error.error is JsObject: ${error.error is JsObject}');
       //print('### error.error is JSObject: ${error.error is JSObject}');
       print('### error.message: ${error.message}');
       print('### error.lineno: ${error.lineno}');
