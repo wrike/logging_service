@@ -48,6 +48,7 @@ class LoggingService {
 
       //if (reThrowErrors) {
         //if (RepeatProtector.shouldBeHandled(error)) {
+          print('### version: 23.03/14:43');
           print('### rethrow');
           html.window.console.error(error.toString());
           html.window.console.error(chain.toString());
