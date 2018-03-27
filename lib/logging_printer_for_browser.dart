@@ -31,6 +31,14 @@ class LoggingPrinterForBrowser {
         html.window.console.error(rec.error.toString() + '\r\n' + stack.toString());
       }
 
+      if (rec.stackTrace is Chain) {
+        print('### rec.stackTrace is Chain');
+        for (var trace in (rec.stackTrace as Chain).traces) {
+          print('### trace.original:');
+          print(trace.original);
+        }
+      }
+
       html.window.console.error(rec.error.toString());
       html.window.console.error(rec.stackTrace.toString());
       html.window.console.error(rec.error.toString() + '\r\n' + rec.stackTrace.toString());
