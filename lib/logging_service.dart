@@ -48,11 +48,13 @@ class LoggingService {
 
       //if (reThrowErrors) {
         //if (RepeatProtector.shouldBeHandled(error)) {
-          print('### version: 23.03/14:43');
-          print('### rethrow');
-          html.window.console.error(error.toString());
-          html.window.console.error(chain.toString());
-          html.window.console.error(error.toString() + '\r\n' + chain.toString());
+//          print('### version: 27.03/17:01');
+//          print('### rethrow');
+//          print('### error.runtimeType: ${error.runtimeType}');
+//          print('### chain.runtimeType: ${chain.runtimeType}');
+//          html.window.console.error(error.toString());
+//          html.window.console.error(chain.toString());
+//          html.window.console.error(error.toString() + '\r\n' + chain.toString());
           //throw error;
         //}
       //}

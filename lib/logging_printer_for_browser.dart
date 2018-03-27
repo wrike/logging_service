@@ -1,6 +1,7 @@
 import 'package:logging/logging.dart' as log;
 import 'package:logging_service/src/js_console_proxy.dart';
 import 'package:stack_trace/stack_trace.dart';
+import 'dart:html' as html;
 
 class LoggingPrinterForBrowser {
   final bool _shouldTerseErrorWhenPrint;
@@ -21,6 +22,18 @@ class LoggingPrinterForBrowser {
       print('### rec.error.runtimeType: ${rec.error.runtimeType}');
       print('### rec.stackTrace: ${rec.stackTrace}');
       print('### rec.stackTrace.runtimeType: ${rec.stackTrace.runtimeType}');
+
+      if (rec.error is Error) {
+        print('### rec.error is Error');
+        var stack = (rec.error as Error).stackTrace;
+        print('### stack: ${stack.runtimeType}');
+        print('### stack.toString():\r\n ${stack.toString()}');
+        html.window.console.error(rec.error.toString() + '\r\n' + stack.toString());
+      }
+
+      html.window.console.error(rec.error.toString());
+      html.window.console.error(rec.stackTrace.toString());
+      html.window.console.error(rec.error.toString() + '\r\n' + rec.stackTrace.toString());
     }
 
 //    var msg = '[${rec.time.toIso8601String()}] ${rec.loggerName}: ${rec.message}';
