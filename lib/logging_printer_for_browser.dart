@@ -26,14 +26,16 @@ class LoggingPrinterForBrowser {
       if (rec.error is Error) {
         print('### rec.error is Error');
         var stack = (rec.error as Error).stackTrace;
-        print('### stack: ${stack.runtimeType}');
+        print('### stack.runtimeType: ${stack.runtimeType}');
         print('### stack.toString():\r\n ${stack.toString()}');
+        print("html.window.console.error(rec.error.toString() + stack.toString())");
         html.window.console.error(rec.error.toString() + '\r\n' + stack.toString());
       }
 
       if (rec.stackTrace is Chain) {
         print('### rec.stackTrace is Chain');
         for (var trace in (rec.stackTrace as Chain).traces) {
+          print('### trace.original.runtimeType: ${trace.original.runtimeType}');
           print('### trace.original:');
           print(trace.original);
         }
