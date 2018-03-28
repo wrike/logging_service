@@ -19,31 +19,30 @@ class LoggingPrinterForBrowser {
       print('### rec.loggerName: ${rec.loggerName}');
       print('### rec.time: ${rec.time}');
       print('### rec.message: ${rec.message}');
-      print('### rec.error.toString(): ${rec.error.toString()}');
+
       print('### rec.error.runtimeType: ${rec.error.runtimeType}');
-      print('### rec.stackTrace.toString(): ${rec.stackTrace.toString()}');
-      print('### rec.stackTrace.runtimeType: ${rec.stackTrace.runtimeType}');
-
-      if (rec.stackTrace is Trace) {
-        print('### rec.stackTrace.terse.toString(): ${(rec.stackTrace as Trace).terse.toString()}');
-      }
-
+      print('### rec.error.toString(): ${rec.error.toString()}');
       if (rec.error is Error) {
         print('### rec.error is Error');
         var stack = (rec.error as Error).stackTrace;
         print('### stack.runtimeType: ${stack.runtimeType}');
         print('### stack.toString():\r\n ${stack.toString()}');
-        print("html.window.console.error(rec.error.toString() + stack.toString())");
-        html.window.console.error(rec.error.toString() + '\r\n' + stack.toString());
       }
 
-      if (rec.stackTrace is Chain) {
+      print('### rec.stackTrace.runtimeType: ${rec.stackTrace.runtimeType}');
+      print('### rec.stackTrace.toString(): ${rec.stackTrace.toString()}');
+      if (rec.stackTrace is Trace) {
+        print('### rec.stackTrace is Trace');
+        print('### rec.stackTrace.terse.toString(): \n${(rec.stackTrace as Trace).terse.toString()}');
+
+      } else if (rec.stackTrace is Chain) {
         print('### rec.stackTrace is Chain');
         for (var trace in (rec.stackTrace as Chain).traces) {
           print('### trace.original.runtimeType: ${trace.original.runtimeType}');
           print('### trace.original:');
           print(trace.original);
         }
+        print('### rec.stackTrace.terse.toString(): \n${(rec.stackTrace as Chain).terse.toString()}');
       }
     }
 
