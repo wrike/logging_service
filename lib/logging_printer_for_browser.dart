@@ -4,6 +4,7 @@ import 'package:stack_trace/stack_trace.dart';
 import 'dart:html' as html;
 
 class LoggingPrinterForBrowser {
+  static const String separatorString = '\n****************************************************************\n';
   final bool _shouldTerseErrorWhenPrint;
   final JsConsoleProxy _consoleProxy;
 
@@ -18,10 +19,14 @@ class LoggingPrinterForBrowser {
       print('### rec.loggerName: ${rec.loggerName}');
       print('### rec.time: ${rec.time}');
       print('### rec.message: ${rec.message}');
-      print('### rec.error: ${rec.error}');
+      print('### rec.error.toString(): ${rec.error.toString()}');
       print('### rec.error.runtimeType: ${rec.error.runtimeType}');
-      print('### rec.stackTrace: ${rec.stackTrace}');
+      print('### rec.stackTrace.toString(): ${rec.stackTrace.toString()}');
       print('### rec.stackTrace.runtimeType: ${rec.stackTrace.runtimeType}');
+
+      if (rec.stackTrace is Trace) {
+        print('### rec.stackTrace.terse.toString(): ${(rec.stackTrace as Trace).terse.toString()}');
+      }
 
       if (rec.error is Error) {
         print('### rec.error is Error');
@@ -40,14 +45,66 @@ class LoggingPrinterForBrowser {
           print(trace.original);
         }
       }
-
-      html.window.console.error(rec.error.toString());
-      html.window.console.error(rec.stackTrace.toString());
-      html.window.console.error(rec.error.toString() + '\r\n' + rec.stackTrace.toString());
     }
 
-//    var msg = '[${rec.time.toIso8601String()}] ${rec.loggerName}: ${rec.message}';
-//
+    var msg = '${rec.sequenceNumber}/${rec.level} [${rec.time.toIso8601String()}] ';
+    msg += '${rec.loggerName}: ${rec.message ?? '<the record.message is empty>'}';
+
+    if (rec.error != null) {
+      msg += separatorString;
+      msg += 'record.error.toString(): \n ${rec.error.toString()}';
+
+      if (rec.error is Error && (rec.error as Error).stackTrace != null) {
+        var stack = (rec.error as Error).stackTrace;
+
+        msg += separatorString;
+        msg += 'record.error.stackTrace.toString(): \n ${stack.toString()}';
+      }
+    }
+
+    if (rec.stackTrace != null) {
+      msg += separatorString;
+      msg += 'record.stackTrace';
+      String traceString;
+
+      if (rec.stackTrace is Trace) {
+        msg += '[Trace]';
+        var trace = rec.stackTrace as Trace;
+        if (_shouldTerseErrorWhenPrint) {
+          msg += '[terse]';
+          trace = trace.terse;
+        }
+
+        traceString = trace.original.toString();
+      } else if (rec.stackTrace is Chain) {
+        msg += '[Chain]';
+        var tracesChain = rec.stackTrace as Chain;
+        if (_shouldTerseErrorWhenPrint) {
+          msg += '[terse]';
+          tracesChain = tracesChain.terse;
+        }
+
+        traceString = tracesChain.traces
+            .map((Trace trace) => trace.original.toString())
+            .join('\n----- async gap ------------------------------------\n');
+      } else {
+        if (_shouldTerseErrorWhenPrint) {
+          msg += '[terse]';
+          traceString = new Trace.from(rec.stackTrace).terse.toString();
+        } else {
+          traceString.toString();
+        }
+      }
+
+      msg += ':\n $traceString';
+    }
+
+    if (rec.level == log.Level.SEVERE) {
+      _consoleProxy.error(msg);
+    } else {
+      _consoleProxy.log(msg);
+    }
+
 //    if (rec.error != null && rec.error.toString() != rec.message) {
 //      msg += '\n' + rec.error.toString();
 //    }

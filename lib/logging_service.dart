@@ -44,7 +44,7 @@ class LoggingService {
   T runProtected<T>(T callback(), {bool reThrowErrors: true, bool when: true}) {
     return Chain.capture<T>(callback, when: when, onError: (dynamic error, Chain chain) {
       print('### Chain.capture-> ${error.hashCode}');
-      handleLogRecord(new log.LogRecord(log.Level.SEVERE, error.toString(), DART_CAPTURED_LOGGER_NAME, error, chain));
+      handleLogRecord(new log.LogRecord(log.Level.SEVERE, null, DART_CAPTURED_LOGGER_NAME, error, chain));
 
       //if (reThrowErrors) {
         //if (RepeatProtector.shouldBeHandled(error)) {
