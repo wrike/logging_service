@@ -111,11 +111,11 @@ class LoggingPrinterForBrowser {
     }
 
     if (additionalMessages.isNotEmpty) {
+      _consoleProxy.group('Additional messages:');
       for (var msg in additionalMessages) {
-        _consoleProxy.group('Additional messages: ');
         _consoleProxy.log(msg);
-        _consoleProxy.groupEnd();
       }
+      _consoleProxy.groupEnd();
     }
 
 //    if (rec.error != null && rec.error.toString() != rec.message) {
