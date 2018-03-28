@@ -51,19 +51,19 @@ class LoggingPrinterForBrowser {
 
     if (rec.error != null) {
       msg += separatorString;
-      msg += 'record.error.toString(): \n ${rec.error.toString()}';
+      msg += ' record.error.toString():\n${rec.error.toString()}';
 
       if (rec.error is Error && (rec.error as Error).stackTrace != null) {
         var stack = (rec.error as Error).stackTrace;
 
         msg += separatorString;
-        msg += 'record.error.stackTrace.toString(): \n ${stack.toString()}';
+        msg += ' record.error.stackTrace.toString():\n${stack.toString()}';
       }
     }
 
     if (rec.stackTrace != null) {
       msg += separatorString;
-      msg += 'record.stackTrace';
+      msg += ' record.stackTrace';
       String traceString;
 
       if (rec.stackTrace is Trace) {
@@ -95,7 +95,7 @@ class LoggingPrinterForBrowser {
         }
       }
 
-      msg += ':\n $traceString';
+      msg += ':\n$traceString';
     }
 
     if (rec.level == log.Level.SEVERE) {
