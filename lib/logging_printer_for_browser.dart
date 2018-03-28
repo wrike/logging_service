@@ -1,7 +1,8 @@
+import 'dart:html' as html;
+
 import 'package:logging/logging.dart' as log;
 import 'package:logging_service/src/js_console_proxy.dart';
 import 'package:stack_trace/stack_trace.dart';
-import 'dart:html' as html;
 
 class LoggingPrinterForBrowser {
   static const String separatorString = '\n****************************************************************\n';
@@ -34,7 +35,6 @@ class LoggingPrinterForBrowser {
       if (rec.stackTrace is Trace) {
         print('### rec.stackTrace is Trace');
         print('### rec.stackTrace.terse.toString():\n${(rec.stackTrace as Trace).terse.toString()}');
-
       } else if (rec.stackTrace is Chain) {
         print('### rec.stackTrace is Chain');
         for (var trace in (rec.stackTrace as Chain).traces) {
@@ -49,23 +49,26 @@ class LoggingPrinterForBrowser {
     var devMode = false;
     assert(devMode = true);
 
-    print('### devMode: ${devMode}');
+    print('### devMode: $devMode');
+    print('### _shouldTerseErrorWhenPrint: $_shouldTerseErrorWhenPrint');
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    var additionalMessages = <String>[];
+    var additionalInfo = <String>[];
     var msg = '${rec.sequenceNumber}/${rec.level} [${rec.time.toIso8601String()}] ';
     msg += '${rec.loggerName}: ${rec.message ?? '<the record.message is empty>'}';
 
     if (rec.error != null) {
-      msg += separatorString;
-      msg += ' record.error.toString():\n${rec.error.toString()}';
+      additionalInfo.add(_makeHeaderString('record.error.toString()'));
+      additionalInfo.add(rec.error.toString());
 
       if (rec.error is Error && (rec.error as Error).stackTrace != null) {
         var stack = (rec.error as Error).stackTrace;
 
-        additionalMessages.add('record.error.stackTrace.toString():');
-        additionalMessages.add(stack.toString());
+        if (!devMode) {
+          additionalInfo.add(_makeHeaderString('record.error.stackTrace.toString()'));
+          additionalInfo.add(stack.toString());
+        }
       }
     }
 
@@ -73,35 +76,59 @@ class LoggingPrinterForBrowser {
       var stackTraceDesc = 'record.stackTrace';
       var traceStrings = <String>[];
 
-      if (rec.stackTrace is Trace) {
-        stackTraceDesc += '[Trace]';
-        var trace = rec.stackTrace as Trace;
+      if (devMode) {
         if (_shouldTerseErrorWhenPrint) {
-          stackTraceDesc += '[terse]';
-          trace = trace.terse;
-        }
-
-        traceStrings.add(trace.original.toString());
-      } else if (rec.stackTrace is Chain) {
-        stackTraceDesc += '[Chain]';
-        var tracesChain = rec.stackTrace as Chain;
-        if (_shouldTerseErrorWhenPrint) {
-          stackTraceDesc += '[terse]';
-          tracesChain = tracesChain.terse;
-        }
-
-        traceStrings.addAll(tracesChain.traces.map((Trace trace) => trace.original.toString()));
-      } else {
-        if (_shouldTerseErrorWhenPrint) {
-          stackTraceDesc += '[terse]';
-          traceStrings.add(new Trace.from(rec.stackTrace).terse.toString());
+          if (rec.stackTrace is Trace) {
+            stackTraceDesc += '<Trace>';
+            traceStrings.add((rec.stackTrace as Trace).terse.toString());
+          } else if (rec.stackTrace is Chain) {
+            stackTraceDesc += '<Chain>';
+            traceStrings.add((rec.stackTrace as Chain).terse.toString());
+          } else {
+            traceStrings.add(new Trace.from(rec.stackTrace).terse.toString());
+          }
+          stackTraceDesc += '<terse>';
         } else {
           traceStrings.add(rec.stackTrace.toString());
         }
-      }
 
-      additionalMessages.add(stackTraceDesc);
-      additionalMessages.addAll(traceStrings);
+        additionalInfo.add(_makeHeaderString(stackTraceDesc));
+        additionalInfo.addAll(traceStrings);
+      } else {
+        if (rec.stackTrace is Trace) {
+          stackTraceDesc += '<Trace>';
+          var trace = rec.stackTrace as Trace;
+          if (_shouldTerseErrorWhenPrint) {
+            stackTraceDesc += '<terse>';
+            trace = trace.terse;
+          }
+
+          traceStrings.add(trace.original.toString());
+        } else if (rec.stackTrace is Chain) {
+          stackTraceDesc += '<Chain>';
+          var tracesChain = rec.stackTrace as Chain;
+          if (_shouldTerseErrorWhenPrint) {
+            stackTraceDesc += '<terse>';
+            tracesChain = tracesChain.terse;
+          }
+
+          traceStrings.addAll(tracesChain.traces.map((Trace trace) => trace.original.toString()));
+        } else {
+          if (_shouldTerseErrorWhenPrint) {
+            stackTraceDesc += '<terse>';
+            traceStrings.add(new Trace.from(rec.stackTrace).terse.toString());
+          } else {
+            traceStrings.add(rec.stackTrace.toString());
+          }
+        }
+
+        additionalInfo.add(_makeHeaderString(stackTraceDesc));
+        additionalInfo.addAll(traceStrings);
+      }
+    }
+
+    if (devMode && additionalInfo.isNotEmpty) {
+      msg += '\n' + additionalInfo.join('\n');
     }
 
     if (rec.level == log.Level.SEVERE) {
@@ -110,9 +137,9 @@ class LoggingPrinterForBrowser {
       _consoleProxy.log(msg);
     }
 
-    if (additionalMessages.isNotEmpty) {
-      _consoleProxy.group('Additional messages:');
-      for (var msg in additionalMessages) {
+    if (additionalInfo.isNotEmpty && !devMode) {
+      _consoleProxy.group('${rec.sequenceNumber}/${rec.level} Additional info:');
+      for (var msg in additionalInfo) {
         _consoleProxy.log(msg);
       }
       _consoleProxy.groupEnd();
@@ -166,4 +193,6 @@ class LoggingPrinterForBrowser {
 
     return trace;
   }
+
+  String _makeHeaderString(String info) => '\n***** $info '.padRight(100, '*');
 }
