@@ -186,6 +186,18 @@ class ConfigureLoggingForBrowser {
           print(stackTrace.toString());
         }
 
+        if (errorEvent.error != null) {
+          try {
+            print('### try get nsested error!');
+            var nestedJsError = new JsObject.fromBrowserObject(errorEvent.error);
+            print('### nestedJsError:');
+            print(nestedJsError.toString());
+
+          } catch(e) {
+            print('### nestedJsError->exception');
+          }
+        }
+
         if (errorEvent.error != null && errorEvent.error is NativeFieldWrapperClass2) {
           print('### errorEvent.error is NativeFieldWrapperClass2');
           var nestedJsError = new JsObject.fromBrowserObject(errorEvent.error);
