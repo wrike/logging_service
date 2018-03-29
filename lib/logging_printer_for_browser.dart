@@ -1,5 +1,3 @@
-import 'dart:html' as html;
-
 import 'package:logging/logging.dart' as log;
 import 'package:logging_service/src/js_console_proxy.dart';
 import 'package:stack_trace/stack_trace.dart';
@@ -76,55 +74,45 @@ class LoggingPrinterForBrowser {
       var stackTraceDesc = 'record.stackTrace';
       var traceStrings = <String>[];
 
+      if (rec.stackTrace is Trace) {
+        stackTraceDesc += '<Trace>';
+      } else if (rec.stackTrace is Chain) {
+        stackTraceDesc += '<Chain>';
+      }
+
+      if (_shouldTerseErrorWhenPrint) {
+        stackTraceDesc += '<terse>';
+      }
+
       if (devMode) {
         if (_shouldTerseErrorWhenPrint) {
           if (rec.stackTrace is Trace) {
-            stackTraceDesc += '<Trace>';
             traceStrings.add((rec.stackTrace as Trace).terse.toString());
           } else if (rec.stackTrace is Chain) {
-            stackTraceDesc += '<Chain>';
             traceStrings.add((rec.stackTrace as Chain).terse.toString());
           } else {
             traceStrings.add(new Trace.from(rec.stackTrace).terse.toString());
           }
-          stackTraceDesc += '<terse>';
         } else {
           traceStrings.add(rec.stackTrace.toString());
         }
 
-        additionalInfo.add(_makeHeaderString(stackTraceDesc));
-        additionalInfo.addAll(traceStrings);
       } else {
         if (rec.stackTrace is Trace) {
-          stackTraceDesc += '<Trace>';
-          var trace = rec.stackTrace as Trace;
-          if (_shouldTerseErrorWhenPrint) {
-            stackTraceDesc += '<terse>';
-            trace = trace.terse;
-          }
-
-          traceStrings.add(trace.original.toString());
+          traceStrings.add(_correctFormat((rec.stackTrace as Trace).original.toString()));
         } else if (rec.stackTrace is Chain) {
-          stackTraceDesc += '<Chain>';
-          var tracesChain = rec.stackTrace as Chain;
-          if (_shouldTerseErrorWhenPrint) {
-            stackTraceDesc += '<terse>';
-            tracesChain = tracesChain.terse;
-          }
-
-          traceStrings.addAll(tracesChain.traces.map((Trace trace) => trace.original.toString()));
+          traceStrings.addAll(
+            (rec.stackTrace as Chain).traces.map(
+                  (Trace trace) => _correctFormat(trace.original.toString()),
+                ),
+          );
         } else {
-          if (_shouldTerseErrorWhenPrint) {
-            stackTraceDesc += '<terse>';
-            traceStrings.add(new Trace.from(rec.stackTrace).terse.toString());
-          } else {
-            traceStrings.add(rec.stackTrace.toString());
-          }
+          traceStrings.add(_correctFormat(rec.stackTrace.toString()));
         }
-
-        additionalInfo.add(_makeHeaderString(stackTraceDesc));
-        additionalInfo.addAll(traceStrings);
       }
+
+      additionalInfo.add(_makeHeaderString(stackTraceDesc));
+      additionalInfo.addAll(traceStrings);
     }
 
     if (devMode && additionalInfo.isNotEmpty) {
