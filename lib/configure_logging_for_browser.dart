@@ -51,7 +51,7 @@ class ConfigureLoggingForBrowser {
   }
 
   static void listenJsErrors(LoggingService loggingService,
-      {bool preventDefault: true, html.Window window, Protector infiniteLoopProtector}) {
+      {bool preventDefault, html.Window window, Protector infiniteLoopProtector}) {
     window = window ?? html.window;
     infiniteLoopProtector = infiniteLoopProtector ?? _defaultProtector;
     print('### listenJsErrors:preventDefault: ${preventDefault}');
@@ -126,7 +126,7 @@ class ConfigureLoggingForBrowser {
     String sentryDsn,
     List<SentryPacketPreSaveHandler> customPreSaveHandlers,
     List<LoggingHandler> customLoggingSavers,
-    bool preventDefaultJsError: true,
+    bool preventDefaultJsError: null,
     Protector jsInfiniteLoopProtector,
   }) {
     loggingService
@@ -161,14 +161,40 @@ class ConfigureLoggingForBrowser {
     print('### _handleJsError->');
     print('### errorEvent.runtimeType: ${errorEvent.runtimeType}');
     print('### errorEvent.toString(): ${errorEvent.toString()}');
+
+    var errorData = <String, String>{};
+
     if (errorEvent is html.ErrorEvent) {
       print('### errorEvent.error.runtimeType: ${errorEvent.error.runtimeType}');
-      print('### errorEvent.error is NativeFieldWrapperClass2: ${errorEvent.error is NativeFieldWrapperClass2}');
-      print('### errorEvent.error is JsObject: ${errorEvent.error is JsObject}');
       print('### errorEvent.error.toString(): ${errorEvent.error.toString()}');
       print('### errorEvent.message: ${errorEvent.message}');
       print('### errorEvent.lineno: ${errorEvent.lineno}');
       print('### errorEvent.filename: ${errorEvent.filename}');
+      print('### errorEvent.type: ${errorEvent.type}');
+      print('### errorEvent.timeStamp: ${errorEvent.timeStamp}');
+
+      errorData['filename'] = errorEvent.filename;
+      errorData['lineno'] = errorEvent.lineno.toString();
+      errorData['type'] = errorEvent.type;
+      errorData['timeStamp'] = errorEvent.timeStamp.toString();
+
+      try {
+        print('### errorEvent.currentTarget: ${errorEvent.currentTarget}');
+        print('### errorEvent.path: ${errorEvent.path}');
+        for (var pathPiece in errorEvent.path) {
+          print('### pathPiece: ${pathPiece}');
+        }
+        print('### errorEvent.target: ${errorEvent.target}');
+        //print('### errorEvent.matchingTarget: ${errorEvent.matchingTarget}');
+//        print('### errorEvent.deepPath: ${errorEvent.deepPath}');
+//        for (var deepPathPiece in errorEvent.deepPath as List<html.EventTarget>) {
+//          print('### deepPathPiece: ${deepPathPiece}');
+//        }
+      } catch(e) {
+        print('### the exception during getting full info');
+        print(e);
+      }
+
     }
 
     try {
@@ -191,28 +217,39 @@ class ConfigureLoggingForBrowser {
         if (errorEvent.error != null) {
           try {
             print('### try get nsested error!');
-            var nestedJsError = new JsObject.fromBrowserObject(errorEvent.error);
-            print('### nestedJsError.toString(): ${nestedJsError.toString()}');
-            if (nestedJsError['stack'] != null) {
-              print("### nestedJsError['stack'] != null");
-              stackTrace = new StackTrace.fromString(nestedJsError['stack'].toString());
-              print("### stackTrace.toString(): ${stackTrace.toString()}");
-            }
-            if (errorMsg == null &&
-                nestedJsError['message'] != null &&
-                nestedJsError['message'].toString().isNotEmpty) {
-              print("### errorMsg == null && nestedJsError['message'] != null");
-              print("### errorMsg = nestedJsError['message'].toString();");
-              errorMsg = nestedJsError['message'].toString();
-            }
+//            var nestedJsError = new JsObject.fromBrowserObject(errorEvent.error);
+//            print('### nestedJsError.toString(): ${nestedJsError.toString()}');
+//            if (nestedJsError['stack'] != null) {
+//              print("### nestedJsError['stack'] != null");
+//              stackTrace = new StackTrace.fromString(nestedJsError['stack'].toString());
+//              print("### stackTrace.toString(): ${stackTrace.toString()}");
+//            }
+//            if (errorMsg == null &&
+//                nestedJsError['message'] != null &&
+//                nestedJsError['message'].toString().isNotEmpty) {
+//              print("### errorMsg == null && nestedJsError['message'] != null");
+//              print("### errorMsg = nestedJsError['message'].toString();");
+//              errorMsg = nestedJsError['message'].toString();
+//            }
 
             print('### try use interop');
             print('### (errorEvent.error as JsError).stack: ${(errorEvent.error as JsError).stack}');
-            if (stackTrace == null && (errorEvent.error as JsError).stack != null) {
-              print("### stackTrace == null && (errorEvent.error as JsError).stack != null");
-              stackTrace = new StackTrace.fromString(nestedJsError['stack'].toString());
+            var nestedStackTrace = (errorEvent.error as JsError).stack;
+            if (stackTrace == null && nestedStackTrace != null) {
+              print("### stackTrace == null && nestedStackTrace != null");
+              stackTrace = new StackTrace.fromString(nestedStackTrace.toString());
             }
+
             print('### (errorEvent.error as JsError).message: ${(errorEvent.error as JsError).message}');
+            var nestedMessage = (errorEvent.error as JsError).message;
+            if (nestedMessage != null && nestedMessage.isNotEmpty) {
+              if (errorMsg == null) {
+                errorMsg = nestedMessage;
+              } else if (!errorMsg.contains(nestedMessage)) {
+                print("### errorMsg += '\\n \$nestedMessage'");
+                errorMsg += '\n $nestedMessage';
+              }
+            }
 
             print('### the nested error has been successfully handled');
           } catch (e) {
@@ -236,16 +273,20 @@ class ConfigureLoggingForBrowser {
           log.Level.SEVERE,
           errorMsg,
           loggerName,
-          errorEvent,
+          errorData,
           stackTrace,
         ),
       );
     } catch (e) {
+      if (errorEvent is html.ErrorEvent) {
+        errorData['message'] = errorEvent.message.toString();
+      }
+
       print('###  catch in _handleJsError!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
       loggingService.handleLogRecord(
         new log.LogRecord(
           log.Level.SEVERE,
-          'The error from js was not parsed correctly, the error: ${errorEvent.toString()}',
+          'The error from js was not parsed correctly, the errorData: ${errorData.toString()}',
           loggerName,
           e,
         ),
