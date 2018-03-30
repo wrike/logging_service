@@ -1,22 +1,20 @@
 import 'dart:convert';
 import 'dart:html' as html;
-import 'dart:js';
-import 'dart:html_common' as html_com;
 
-import 'dart:nativewrappers';
 import 'package:logging/logging.dart' as log;
-import 'package:logging_service/infinite_loop_protector.dart';
-import 'package:logging_service/protector.dart';
-import 'package:logging_service/src/js_console_proxy.dart';
-import 'package:logging_service/src/js_utils.dart';
 import 'package:sentry_client/sentry_client_browser.dart';
 import 'package:sentry_client/sentry_dsn.dart';
 
+import 'infinite_loop_protector.dart';
 import 'logging_printer_for_browser.dart';
 import 'logging_saver_for_sentry.dart';
 import 'logging_service.dart';
+import 'protector.dart';
 import 'sentry_pre_save_for_browser.dart';
+import 'src/dev_mode.dart';
+import 'src/js_console_proxy.dart';
 import 'src/js_pre_start_errors_list_utils.dart';
+import 'src/js_utils.dart';
 
 const _json = const JsonCodec();
 
@@ -51,7 +49,7 @@ class ConfigureLoggingForBrowser {
   }
 
   static void listenJsErrors(LoggingService loggingService,
-      {bool preventDefault, html.Window window, Protector infiniteLoopProtector}) {
+      {bool preventDefault: true, html.Window window, Protector infiniteLoopProtector}) {
     window = window ?? html.window;
     infiniteLoopProtector = infiniteLoopProtector ?? _defaultProtector;
     print('### listenJsErrors:preventDefault: ${preventDefault}');
@@ -76,13 +74,17 @@ class ConfigureLoggingForBrowser {
         return null;
       }
 
-//      if (preventDefault) {
-//        print('### preventDefault');
-//        error.preventDefault();
-//      }
+      if (preventDefault) {
+        print('### preventDefault');
+        error.preventDefault();
+      }
 
       if (infiniteLoopProtector != null && !infiniteLoopProtector(error)) {
         _consoleProxy.log('The handling of js-errors was disabled by the infinity-loop protector');
+        return null;
+      }
+
+      if (!preventDefault && isInDevNode()) {
         return null;
       }
 
@@ -126,7 +128,7 @@ class ConfigureLoggingForBrowser {
     String sentryDsn,
     List<SentryPacketPreSaveHandler> customPreSaveHandlers,
     List<LoggingHandler> customLoggingSavers,
-    bool preventDefaultJsError: null,
+    bool preventDefaultJsError: true,
     Protector jsInfiniteLoopProtector,
   }) {
     loggingService
@@ -190,11 +192,10 @@ class ConfigureLoggingForBrowser {
 //        for (var deepPathPiece in errorEvent.deepPath as List<html.EventTarget>) {
 //          print('### deepPathPiece: ${deepPathPiece}');
 //        }
-      } catch(e) {
+      } catch (e) {
         print('### the exception during getting full info');
         print(e);
       }
-
     }
 
     try {

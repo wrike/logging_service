@@ -46,6 +46,7 @@ class LoggingSaverForSentry {
     String exceptionValue;
     String exceptionType;
 
+    //TODO: refactor this place!
     if (record.message == record.error.toString() && record.message.indexOf(':') > 0) {
       exceptionType = record.message.split(':').first;
       exceptionValue = record.message.substring(exceptionType.length + 1).trim();
