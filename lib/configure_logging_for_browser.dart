@@ -176,6 +176,7 @@ class ConfigureLoggingForBrowser {
 
       if (errorEvent is html.ErrorEvent) {
         if (errorEvent.message != null && errorEvent.message.toString().isNotEmpty) {
+          print('### errorMsg = errorEvent.message.toString();');
           errorMsg = errorEvent.message.toString();
         }
 
@@ -190,27 +191,33 @@ class ConfigureLoggingForBrowser {
           try {
             print('### try get nsested error!');
             var nestedJsError = new JsObject.fromBrowserObject(errorEvent.error);
-            print('### nestedJsError:');
-            print(nestedJsError.toString());
-
-          } catch(e) {
+            print('### nestedJsError.toString(): ${nestedJsError.toString()}');
+            if (nestedJsError['stack'] != null) {
+              print("### nestedJsError['stack'] != null");
+              stackTrace = new StackTrace.fromString(nestedJsError['stack'].toString());
+              print("### stackTrace.toString(): ${stackTrace.toString()}");
+            }
+            if (errorMsg == null &&
+                nestedJsError['message'] != null &&
+                nestedJsError['message'].toString().isNotEmpty) {
+              print("### errorMsg == null && nestedJsError['message'] != null");
+              print("### errorMsg = nestedJsError['message'].toString();");
+              errorMsg = nestedJsError['message'].toString();
+            }
+            print('### the nested error has been successfully handled');
+          } catch (e) {
             print('### nestedJsError->exception');
           }
-        }
 
-        if (errorEvent.error != null && errorEvent.error is NativeFieldWrapperClass2) {
-          print('### errorEvent.error is NativeFieldWrapperClass2');
-          var nestedJsError = new JsObject.fromBrowserObject(errorEvent.error);
-          if (nestedJsError['stack'] != null) {
-            stackTrace = new StackTrace.fromString(nestedJsError['stack'].toString());
-          }
-          if (errorMsg == null && nestedJsError['message'] != null) {
-            errorMsg = nestedJsError['message'].toString();
+          if (errorMsg == null && errorEvent.error.toString().isNotEmpty) {
+            print('### errorMsg = errorEvent.error.toString();');
+            errorMsg = errorEvent.error.toString();
           }
         }
       }
 
       if (errorMsg == null) {
+        print('errorMsg = errorEvent.toString()');
         errorMsg = errorEvent.toString();
       }
 
