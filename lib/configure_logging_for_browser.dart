@@ -8,6 +8,7 @@ import 'package:logging/logging.dart' as log;
 import 'package:logging_service/infinite_loop_protector.dart';
 import 'package:logging_service/protector.dart';
 import 'package:logging_service/src/js_console_proxy.dart';
+import 'package:logging_service/src/js_utils.dart';
 import 'package:sentry_client/sentry_client_browser.dart';
 import 'package:sentry_client/sentry_dsn.dart';
 
@@ -204,6 +205,15 @@ class ConfigureLoggingForBrowser {
               print("### errorMsg = nestedJsError['message'].toString();");
               errorMsg = nestedJsError['message'].toString();
             }
+
+            print('### try use interop');
+            print('### (errorEvent.error as JsError).stack: ${(errorEvent.error as JsError).stack}');
+            if (stackTrace == null && (errorEvent.error as JsError).stack != null) {
+              print("### stackTrace == null && (errorEvent.error as JsError).stack != null");
+              stackTrace = new StackTrace.fromString(nestedJsError['stack'].toString());
+            }
+            print('### (errorEvent.error as JsError).message: ${(errorEvent.error as JsError).message}');
+
             print('### the nested error has been successfully handled');
           } catch (e) {
             print('### nestedJsError->exception');
