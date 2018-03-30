@@ -75,10 +75,10 @@ class ConfigureLoggingForBrowser {
         return null;
       }
 
-      if (preventDefault) {
-        print('### preventDefault');
-        error.preventDefault();
-      }
+//      if (preventDefault) {
+//        print('### preventDefault');
+//        error.preventDefault();
+//      }
 
       if (infiniteLoopProtector != null && !infiniteLoopProtector(error)) {
         _consoleProxy.log('The handling of js-errors was disabled by the infinity-loop protector');
