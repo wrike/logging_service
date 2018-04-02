@@ -35,6 +35,10 @@ class LoggingSaverForSentry {
       exceptionValues: getSentryExceptionValuesByLogRecord(rec),
     );
 
+    if (rec.error is Map<String, String>) {
+      packet.extra.addAll(rec.error as Map<String, String>);
+    }
+
     for (final handler in _preSaveHandlers) {
       handler(packet);
     }
@@ -46,13 +50,18 @@ class LoggingSaverForSentry {
     String exceptionValue;
     String exceptionType;
 
-    //TODO: refactor this place!
-    if (record.message == record.error.toString() && record.message.indexOf(':') > 0) {
-      exceptionType = record.message.split(':').first;
-      exceptionValue = record.message.substring(exceptionType.length + 1).trim();
-    } else {
-      exceptionType = record.error.toString();
+    if (record.stackTrace != null) {
+      var traceString = record.stackTrace.toString();
+
+      if (traceString.indexOf(':') > 0) {
+        exceptionType = traceString.split(':').first;
+      }
+    }
+
+    if (record.message != null && record.message.isNotEmpty) {
       exceptionValue = record.message;
+    } else if (record.error != null && record.error.toString().isNotEmpty) {
+      exceptionValue = record.error.toString();
     }
 
     if (record.stackTrace != null) {
