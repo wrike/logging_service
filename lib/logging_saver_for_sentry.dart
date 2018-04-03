@@ -47,15 +47,22 @@ class LoggingSaverForSentry {
   }
 
   static List<SentryException> getSentryExceptionValuesByLogRecord(log.LogRecord record) {
+    print('### getSentryExceptionValuesByLogRecord');
     String exceptionValue;
     String exceptionType;
 
-    if (record.stackTrace != null) {
-      var traceString = record.stackTrace.toString();
+    if (record.stackTrace == null) {
+      return <SentryException>[];
+    }
 
-      if (traceString.indexOf(':') > 0) {
-        exceptionType = traceString.split(':').first;
-      }
+    print('### record.stackTrace != null');
+    var traceString = record.stackTrace.toString();
+    print(traceString);
+
+    if (traceString.indexOf(':') > 0) {
+      print("### traceString.indexOf(':') > 0");
+      exceptionType = traceString.split(':').first;
+      print('### exceptionType: $exceptionType');
     }
 
     if (record.message != null && record.message.isNotEmpty) {
@@ -64,33 +71,29 @@ class LoggingSaverForSentry {
       exceptionValue = record.error.toString();
     }
 
-    if (record.stackTrace != null) {
-      if (record.stackTrace is Chain) {
-        return (record.stackTrace as Chain)
-            .traces
-            .map((Trace trace) => new SentryException(
-                type: exceptionType, value: exceptionValue, stacktrace: getSentryTraceFromParsedTrace(trace)))
-            .toList();
-      } else if (record.stackTrace is Trace) {
-        return [
-          new SentryException(
-            type: exceptionType,
-            value: exceptionValue,
-            stacktrace: getSentryTraceFromParsedTrace(record.stackTrace as Trace),
-          )
-        ];
-      } else {
-        return [
-          new SentryException(
-            type: exceptionType,
-            value: exceptionValue,
-            stacktrace: getSentryTraceFromParsedTrace(new Trace.from(record.stackTrace)),
-          )
-        ];
-      }
+    if (record.stackTrace is Chain) {
+      return (record.stackTrace as Chain)
+          .traces
+          .map((Trace trace) => new SentryException(
+              type: exceptionType, value: exceptionValue, stacktrace: getSentryTraceFromParsedTrace(trace)))
+          .toList();
+    } else if (record.stackTrace is Trace) {
+      return [
+        new SentryException(
+          type: exceptionType,
+          value: exceptionValue,
+          stacktrace: getSentryTraceFromParsedTrace(record.stackTrace as Trace),
+        )
+      ];
+    } else {
+      return [
+        new SentryException(
+          type: exceptionType,
+          value: exceptionValue,
+          stacktrace: getSentryTraceFromParsedTrace(new Trace.from(record.stackTrace)),
+        )
+      ];
     }
-
-    return <SentryException>[];
   }
 
   static SentryStacktrace getSentryTraceFromParsedTrace(Trace trace) {
