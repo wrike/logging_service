@@ -26,7 +26,6 @@ class ConfigureLoggingForBrowser {
   static final JsConsoleProxy _consoleProxy = new JsConsoleProxy();
 
   static void collectPreStartJsErrors(LoggingService loggingService) {
-    print('### collectPreStartJsErrors');
     if (loggingServiceJsPreStartErrorsList is List) {
       loggingServiceJsPreStartErrorsList.forEach((error) {
         if (error is! html.Event) {
@@ -52,13 +51,9 @@ class ConfigureLoggingForBrowser {
       {bool preventDefault: true, html.Window window, Protector infiniteLoopProtector}) {
     window = window ?? html.window;
     infiniteLoopProtector = infiniteLoopProtector ?? _defaultProtector;
-    print('### listenJsErrors:preventDefault: ${preventDefault}');
 
     window.onError.listen((html.Event error) {
-      print('### window.onError-> error.hashCode: ${error.hashCode}');
-
       if (!RepeatProtector.shouldBeHandled(error)) {
-        print('### listenJsErrors->!RepeatProtector.shouldBeHandled(error)');
         return null;
       }
 
@@ -75,7 +70,6 @@ class ConfigureLoggingForBrowser {
       }
 
       if (preventDefault) {
-        print('### preventDefault');
         error.preventDefault();
       }
 
@@ -160,138 +154,63 @@ class ConfigureLoggingForBrowser {
   }
 
   static void _handleJsError(html.Event errorEvent, LoggingService loggingService, String loggerName) {
-    print('### _handleJsError->');
-    print('### errorEvent.runtimeType: ${errorEvent.runtimeType}');
-    print('### errorEvent.toString(): ${errorEvent.toString()}');
-
+    String errorMsg;
     var errorData = <String, String>{};
 
-    if (errorEvent is html.ErrorEvent) {
-      print('### errorEvent.error.runtimeType: ${errorEvent.error.runtimeType}');
-      print('### errorEvent.error.toString(): ${errorEvent.error.toString()}');
-      print('### errorEvent.message: ${errorEvent.message}');
-      print('### errorEvent.lineno: ${errorEvent.lineno}');
-      print('### errorEvent.filename: ${errorEvent.filename}');
-      print('### errorEvent.type: ${errorEvent.type}');
-      print('### errorEvent.timeStamp: ${errorEvent.timeStamp}');
-
-      errorData['filename'] = errorEvent.filename;
-      errorData['lineno'] = errorEvent.lineno.toString();
-      errorData['type'] = errorEvent.type;
-      errorData['timeStamp'] = errorEvent.timeStamp.toString();
-
-      try {
-        print('### errorEvent.currentTarget: ${errorEvent.currentTarget}');
-        print('### errorEvent.path: ${errorEvent.path}');
-        for (var pathPiece in errorEvent.path) {
-          print('### pathPiece: ${pathPiece}');
-        }
-        print('### errorEvent.target: ${errorEvent.target}');
-        //print('### errorEvent.matchingTarget: ${errorEvent.matchingTarget}');
-//        print('### errorEvent.deepPath: ${errorEvent.deepPath}');
-//        for (var deepPathPiece in errorEvent.deepPath as List<html.EventTarget>) {
-//          print('### deepPathPiece: ${deepPathPiece}');
-//        }
-      } catch (e) {
-        print('### the exception during getting full info');
-        print(e);
-      }
-    }
-
     try {
-      String errorMsg;
       StackTrace stackTrace;
 
       if (errorEvent is html.ErrorEvent) {
+        errorData['filename'] = errorEvent.filename;
+        errorData['lineno'] = errorEvent.lineno.toString();
+        errorData['type'] = errorEvent.type;
+        errorData['timeStamp'] = errorEvent.timeStamp.toString();
+
         if (errorEvent.message != null && errorEvent.message.toString().isNotEmpty) {
-          print('### errorMsg = errorEvent.message.toString();');
           errorMsg = errorEvent.message.toString();
         }
 
-        if (errorEvent.error is String) {
-          print('### errorEvent.error is String');
-          print('### try to parse the stack');
-          stackTrace = new StackTrace.fromString(errorEvent.error.toString());
-          print(stackTrace.toString());
-        }
-
         if (errorEvent.error != null) {
-          try {
-            print('### try get nsested error!');
-//            var nestedJsError = new JsObject.fromBrowserObject(errorEvent.error);
-//            print('### nestedJsError.toString(): ${nestedJsError.toString()}');
-//            if (nestedJsError['stack'] != null) {
-//              print("### nestedJsError['stack'] != null");
-//              stackTrace = new StackTrace.fromString(nestedJsError['stack'].toString());
-//              print("### stackTrace.toString(): ${stackTrace.toString()}");
-//            }
-//            if (errorMsg == null &&
-//                nestedJsError['message'] != null &&
-//                nestedJsError['message'].toString().isNotEmpty) {
-//              print("### errorMsg == null && nestedJsError['message'] != null");
-//              print("### errorMsg = nestedJsError['message'].toString();");
-//              errorMsg = nestedJsError['message'].toString();
-//            }
-
-            print('### try use interop');
-            print('### (errorEvent.error as JsError).stack: ${(errorEvent.error as JsError).stack}');
-            var nestedStackTrace = (errorEvent.error as JsError).stack;
-            if (stackTrace == null && nestedStackTrace != null) {
-              print("### stackTrace == null && nestedStackTrace != null");
-              stackTrace = new StackTrace.fromString(nestedStackTrace.toString());
-            }
-
-            print('### (errorEvent.error as JsError).message: ${(errorEvent.error as JsError).message}');
-            var nestedMessage = (errorEvent.error as JsError).message;
-            if (nestedMessage != null && nestedMessage.isNotEmpty) {
-              if (errorMsg == null) {
-                errorMsg = nestedMessage;
-              } else if (!errorMsg.contains(nestedMessage)) {
-                print("### errorMsg += '\\n \$nestedMessage'");
-                errorMsg += '\n $nestedMessage';
+          if (errorEvent.error is String) {
+            stackTrace = new StackTrace.fromString(errorEvent.error.toString());
+          } else {
+            try {
+              var nestedStackTrace = (errorEvent.error as JsError).stack;
+              if (stackTrace == null && nestedStackTrace != null) {
+                stackTrace = new StackTrace.fromString(nestedStackTrace.toString());
               }
+
+              var nestedMessage = (errorEvent.error as JsError).message;
+              if (nestedMessage != null && nestedMessage.isNotEmpty) {
+                if (errorMsg == null) {
+                  errorMsg = nestedMessage;
+                } else if (!errorMsg.contains(nestedMessage)) {
+                  errorMsg += '\n $nestedMessage';
+                }
+              }
+            } catch (e) {
+              /// We are here because errorEvent.error is not a JsObject and JsInterop failed.
             }
 
-            print('### the nested error has been successfully handled');
-          } catch (e) {
-            print('### nestedJsError->exception');
-          }
-
-          if (errorMsg == null && errorEvent.error.toString().isNotEmpty) {
-            print('### errorMsg = errorEvent.error.toString();');
-            errorMsg = errorEvent.error.toString();
+            if (errorMsg == null && errorEvent.error.toString().isNotEmpty) {
+              errorMsg = errorEvent.error.toString();
+            }
           }
         }
       }
 
       if (errorMsg == null) {
-        print('errorMsg = errorEvent.toString()');
         errorMsg = errorEvent.toString();
       }
 
-      loggingService.handleLogRecord(
-        new log.LogRecord(
-          log.Level.SEVERE,
-          errorMsg,
-          loggerName,
-          errorData,
-          stackTrace,
-        ),
-      );
-    } catch (e) {
+      loggingService.handleLogRecord(new log.LogRecord(log.Level.SEVERE, errorMsg, loggerName, errorData, stackTrace));
+    } catch (exception) {
       if (errorEvent is html.ErrorEvent) {
         errorData['message'] = errorEvent.message.toString();
       }
 
-      print('###  catch in _handleJsError!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
-      loggingService.handleLogRecord(
-        new log.LogRecord(
-          log.Level.SEVERE,
-          'The error from js was not parsed correctly, the errorData: ${errorData.toString()}',
-          loggerName,
-          e,
-        ),
-      );
+      errorMsg = 'The error from js was not parsed correctly, the errorData: ${errorData.toString()}';
+      loggingService.handleLogRecord(new log.LogRecord(log.Level.SEVERE, errorMsg, loggerName, exception));
     }
   }
 }

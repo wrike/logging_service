@@ -41,25 +41,10 @@ class LoggingService {
     }
   }
 
-  T runProtected<T>(T callback(), {bool reThrowErrors: true, bool when: true}) {
-    return Chain.capture<T>(callback, when: when, onError: (dynamic error, Chain chain) {
-      print('### Chain.capture-> ${error.hashCode}');
-      handleLogRecord(new log.LogRecord(log.Level.SEVERE, null, DART_CAPTURED_LOGGER_NAME, error, chain));
-
-      //if (reThrowErrors) {
-        //if (RepeatProtector.shouldBeHandled(error)) {
-//          print('### version: 27.03/17:01');
-//          print('### rethrow');
-//          print('### error.runtimeType: ${error.runtimeType}');
-//          print('### chain.runtimeType: ${chain.runtimeType}');
-//          html.window.console.error(error.toString());
-//          html.window.console.error(chain.toString());
-//          html.window.console.error(error.toString() + '\r\n' + chain.toString());
-          //throw error;
-        //}
-      //}
-    });
-  }
+  T runProtected<T>(T callback(), {bool reThrowErrors: true, bool when: true}) =>
+      Chain.capture<T>(callback, when: when, onError: (dynamic error, Chain chain) {
+        handleLogRecord(new log.LogRecord(log.Level.SEVERE, null, DART_CAPTURED_LOGGER_NAME, error, chain));
+      });
 
   void setLogLevelPerLogger(String loggerName, log.Level level) {
     _logLevelsPerLogger[loggerName] = level;

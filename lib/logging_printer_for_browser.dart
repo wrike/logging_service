@@ -14,43 +14,6 @@ class LoggingPrinterForBrowser {
         _consoleProxy = consoleProxy ?? new JsConsoleProxy();
 
   void call(log.LogRecord rec) {
-    print('### Log: ${rec.sequenceNumber}');
-    if (rec.level == log.Level.SEVERE) {
-      print('### rec.level: ${rec.level}');
-      print('### rec.loggerName: ${rec.loggerName}');
-      print('### rec.time: ${rec.time}');
-      print('### rec.message: ${rec.message}');
-
-      print('### rec.error.runtimeType: ${rec.error.runtimeType}');
-      print('### rec.error.toString():\n${rec.error.toString()}');
-      if (rec.error is Error) {
-        print('### rec.error is Error');
-        var stack = (rec.error as Error).stackTrace;
-        print('### stack.runtimeType: ${stack.runtimeType}');
-        print('### stack.toString():\n${stack.toString()}');
-      }
-
-      print('### rec.stackTrace.runtimeType: ${rec.stackTrace.runtimeType}');
-      print('### rec.stackTrace.toString():\n${rec.stackTrace.toString()}');
-      if (rec.stackTrace is Trace) {
-        print('### rec.stackTrace is Trace');
-        print('### rec.stackTrace.terse.toString():\n${(rec.stackTrace as Trace).terse.toString()}');
-      } else if (rec.stackTrace is Chain) {
-        print('### rec.stackTrace is Chain');
-        for (var trace in (rec.stackTrace as Chain).traces) {
-          print('### trace.original.runtimeType: ${trace.original.runtimeType}');
-          print('### trace.original:');
-          print(trace.original);
-        }
-        print('### rec.stackTrace.terse.toString():\n${(rec.stackTrace as Chain).terse.toString()}');
-      }
-    }
-
-    print('### devMode: ${isWeInDevNode()}');
-    print('### _shouldTerseErrorWhenPrint: $_shouldTerseErrorWhenPrint');
-
-    /////////////////////////////////////////////////////////////////////////////////////////////////////
-
     var additionalInfo = <String>[];
     var msg = '${rec.sequenceNumber}/${rec.level} [${rec.time.toIso8601String()}] ${rec.loggerName}: ';
     var shouldWeSubstituteMsg = rec.message == null || rec.message.isEmpty;

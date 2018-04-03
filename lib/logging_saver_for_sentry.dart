@@ -47,7 +47,6 @@ class LoggingSaverForSentry {
   }
 
   static List<SentryException> getSentryExceptionValuesByLogRecord(log.LogRecord record) {
-    print('### getSentryExceptionValuesByLogRecord');
     String exceptionValue;
     String exceptionType;
 
@@ -55,7 +54,6 @@ class LoggingSaverForSentry {
       return <SentryException>[];
     }
 
-    print('### record.stackTrace != null');
     //TODO: refactor: create wrapper for traces
     String traceString;
     if (record.stackTrace is Chain) {
@@ -65,12 +63,9 @@ class LoggingSaverForSentry {
     } else {
       traceString = record.stackTrace.toString();
     }
-    print(traceString);
 
     if (traceString.indexOf(':') > 0) {
-      print("### traceString.indexOf(':') > 0");
       exceptionType = traceString.split(':').first;
-      print('### exceptionType: $exceptionType');
     }
 
     if (record.message != null && record.message.isNotEmpty) {
