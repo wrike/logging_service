@@ -56,7 +56,12 @@ class LoggingSaverForSentry {
     }
 
     print('### record.stackTrace != null');
-    var traceString = record.stackTrace.toString();
+    String traceString;
+    if (record.stackTrace is Chain) {
+      traceString = (record.stackTrace as Chain).traces.first.toString();
+    } else {
+      traceString = record.stackTrace.toString();
+    }
     print(traceString);
 
     if (traceString.indexOf(':') > 0) {
