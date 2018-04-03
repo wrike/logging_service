@@ -56,9 +56,12 @@ class LoggingSaverForSentry {
     }
 
     print('### record.stackTrace != null');
+    //TODO: refactor: create wrapper for traces
     String traceString;
     if (record.stackTrace is Chain) {
-      traceString = (record.stackTrace as Chain).traces.first.toString();
+      traceString = (record.stackTrace as Chain).traces.first.original.toString();
+    } else if (record.stackTrace is Trace) {
+      traceString = (record.stackTrace as Trace).original.toString();
     } else {
       traceString = record.stackTrace.toString();
     }
