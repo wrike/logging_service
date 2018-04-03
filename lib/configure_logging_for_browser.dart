@@ -150,7 +150,7 @@ class ConfigureLoggingForBrowser {
     setLogLevelsFromUrl(loggingService);
     listenJsErrors(loggingService,
         preventDefault: preventDefaultJsError, infiniteLoopProtector: jsInfiniteLoopProtector);
-//    collectPreStartJsErrors(loggingService);
+    collectPreStartJsErrors(loggingService);
   }
 
   static void _handleJsError(html.Event errorEvent, LoggingService loggingService, String loggerName) {
