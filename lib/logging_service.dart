@@ -1,7 +1,4 @@
-import 'dart:html' as html;
-
 import 'package:logging/logging.dart' as log;
-import 'package:logging_service/protector.dart';
 import 'package:stack_trace/stack_trace.dart';
 
 typedef void LoggingHandler(log.LogRecord rec);
