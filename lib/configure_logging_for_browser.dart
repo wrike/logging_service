@@ -148,8 +148,11 @@ class ConfigureLoggingForBrowser {
     }
 
     setLogLevelsFromUrl(loggingService);
-    listenJsErrors(loggingService,
-        preventDefault: preventDefaultJsError, infiniteLoopProtector: jsInfiniteLoopProtector);
+    listenJsErrors(
+      loggingService,
+      preventDefault: preventDefaultJsError,
+      infiniteLoopProtector: jsInfiniteLoopProtector,
+    );
     collectPreStartJsErrors(loggingService);
   }
 
