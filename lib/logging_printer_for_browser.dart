@@ -46,23 +46,35 @@ class LoggingPrinterForBrowser {
       }
     }
 
-    print('### devMode: ${isInDevNode()}');
+    print('### devMode: ${isWeInDevNode()}');
     print('### _shouldTerseErrorWhenPrint: $_shouldTerseErrorWhenPrint');
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////
 
     var additionalInfo = <String>[];
-    var msg = '${rec.sequenceNumber}/${rec.level} [${rec.time.toIso8601String()}] ';
-    msg += '${rec.loggerName}: ${rec.message ?? '<the record.message is empty>'}';
+    var msg = '${rec.sequenceNumber}/${rec.level} [${rec.time.toIso8601String()}] ${rec.loggerName}: ';
+    var shouldWeSubstituteMsg = rec.message == null || rec.message.isEmpty;
+
+    if (shouldWeSubstituteMsg) {
+      if (rec.error != null && rec.error.toString().isNotEmpty) {
+        msg += rec.error.toString();
+      } else {
+        msg += '<the record.message is empty>';
+      }
+    } else {
+      msg += rec.message;
+    }
 
     if (rec.error != null) {
-      additionalInfo.add(_makeHeaderString('record.error.toString()'));
-      additionalInfo.add(rec.error.toString());
+      if (!shouldWeSubstituteMsg) {
+        additionalInfo.add(_makeHeaderString('record.error.toString()'));
+        additionalInfo.add(rec.error.toString());
+      }
 
       if (rec.error is Error && (rec.error as Error).stackTrace != null) {
         var stack = (rec.error as Error).stackTrace;
 
-        if (!isInDevNode()) {
+        if (!isWeInDevNode()) {
           additionalInfo.add(_makeHeaderString('record.error.stackTrace.toString()'));
           additionalInfo.add(stack.toString());
         }
@@ -83,7 +95,7 @@ class LoggingPrinterForBrowser {
         stackTraceDesc += '<terse>';
       }
 
-      if (isInDevNode()) {
+      if (isWeInDevNode()) {
         if (_shouldTerseErrorWhenPrint) {
           if (rec.stackTrace is Trace) {
             traceStrings.add((rec.stackTrace as Trace).terse.toString());
@@ -114,7 +126,7 @@ class LoggingPrinterForBrowser {
       additionalInfo.addAll(traceStrings);
     }
 
-    if (isInDevNode() && additionalInfo.isNotEmpty) {
+    if (isWeInDevNode() && additionalInfo.isNotEmpty) {
       msg += '\n' + additionalInfo.join('\n');
     }
 
@@ -124,7 +136,7 @@ class LoggingPrinterForBrowser {
       _consoleProxy.log(msg);
     }
 
-    if (additionalInfo.isNotEmpty && !isInDevNode()) {
+    if (additionalInfo.isNotEmpty && !isWeInDevNode()) {
       _consoleProxy.group('${rec.sequenceNumber}/${rec.level} Additional info:');
       for (var msg in additionalInfo) {
         _consoleProxy.log(msg);
