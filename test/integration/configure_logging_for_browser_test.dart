@@ -9,20 +9,9 @@ import 'package:logging_service/logging_service.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
 
-void main() {
-  var testStack = r'''
-stackTrace: Exception
-    at Object.wrapException (http://localhost:8080/integration/configure_logging_for_browser_test.dart.js:2776:17)
-    at StaticClosure.dart.main (http://localhost:8080/integration/configure_logging_for_browser_test.dart.js:9973:15)
-    at _IsolateContext.eval$1 (http://localhost:8080/integration/configure_logging_for_browser_test.dart.js:1905:25)
-    at Object.startRootIsolate (http://localhost:8080/integration/configure_logging_for_browser_test.dart.js:1618:21)
-    at http://localhost:8080/integration/configure_logging_for_browser_test.dart.js:10729:11
-    at http://localhost:8080/integration/configure_logging_for_browser_test.dart.js:10730:9
-    at http://localhost:8080/integration/configure_logging_for_browser_test.dart.js:10710:7
-    at http://localhost:8080/integration/configure_logging_for_browser_test.dart.js:10721:5
-    at http://localhost:8080/integration/configure_logging_for_browser_test.dart.js:10733:3
-  ''';
+import '../test_stacks.dart';
 
+void main() {
   group('listenJsErrors should', () {
     LoggingServiceMock loggingServiceMock;
     StreamController<dynamic> onErrorStreamController;
