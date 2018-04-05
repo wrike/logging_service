@@ -76,6 +76,36 @@ stackTrace: Exception
       verify(loggingServiceMock.handleLogRecord(captureAny)).called(1);
     });
 
+    test('aggregate info from the nested error message if it is additional info', () {
+      var errorMock = new html.ErrorEvent('testType', <dynamic, dynamic>{
+        'message': 'testMsg',
+        'error': html_common.convertDartToNative_Dictionary(<dynamic, dynamic>{
+          'message': 'additional testMsg',
+        }),
+      });
+
+      onErrorStreamController.add(errorMock);
+
+      // ignore: argument_type_not_assignable
+      var rec = verify(loggingServiceMock.handleLogRecord(captureAny)).captured.first as log.LogRecord;
+      expect(rec.message, contains('additional testMsg'));
+    });
+
+    test('not aggregate info from the nested error message if it does not contain addtional info', () {
+      var errorMock = new html.ErrorEvent('testType', <dynamic, dynamic>{
+        'message': 'Msg: testMsg',
+        'error': html_common.convertDartToNative_Dictionary(<dynamic, dynamic>{
+          'message': 'testMsg',
+        }),
+      });
+
+      onErrorStreamController.add(errorMock);
+
+      // ignore: argument_type_not_assignable
+      var rec = verify(loggingServiceMock.handleLogRecord(captureAny)).captured.first as log.LogRecord;
+      expect('testMsg'.allMatches(rec.message).toList().length, 1);
+    });
+
     test('get the stack-trace from the nested error object if it exists', () {
       var errorMock = new html.ErrorEvent(
         'testType',
