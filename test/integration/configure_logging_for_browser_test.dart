@@ -64,6 +64,18 @@ stackTrace: Exception
       expect((rec.error as Map).isNotEmpty, true);
     });
 
+    test('not faile if the errorEvent.error is not a JsError', () {
+      var errorMock = new html.ErrorEvent('testType', <dynamic, dynamic>{
+        'message': 'testMsg',
+        'error': new Object(),
+      });
+
+      onErrorStreamController.add(errorMock);
+
+      // ignore: argument_type_not_assignable
+      verify(loggingServiceMock.handleLogRecord(captureAny)).called(1);
+    });
+
     test('get the stack-trace from the nested error object if it exists', () {
       var errorMock = new html.ErrorEvent(
         'testType',

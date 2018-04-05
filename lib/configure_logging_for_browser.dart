@@ -159,61 +159,51 @@ class ConfigureLoggingForBrowser {
   static void _handleJsError(html.Event errorEvent, LoggingService loggingService, String loggerName) {
     String errorMsg;
     var errorData = <String, String>{};
+    StackTrace stackTrace;
 
-    try {
-      StackTrace stackTrace;
+    if (errorEvent is html.ErrorEvent) {
+      errorData['filename'] = errorEvent.filename;
+      errorData['lineno'] = errorEvent.lineno.toString();
+      errorData['type'] = errorEvent.type;
+      errorData['timeStamp'] = errorEvent.timeStamp.toString();
 
-      if (errorEvent is html.ErrorEvent) {
-        errorData['filename'] = errorEvent.filename;
-        errorData['lineno'] = errorEvent.lineno.toString();
-        errorData['type'] = errorEvent.type;
-        errorData['timeStamp'] = errorEvent.timeStamp.toString();
+      if (errorEvent.message != null && errorEvent.message.toString().isNotEmpty) {
+        errorMsg = errorEvent.message.toString();
+      }
 
-        if (errorEvent.message != null && errorEvent.message.toString().isNotEmpty) {
-          errorMsg = errorEvent.message.toString();
-        }
-
-        if (errorEvent.error != null) {
-          if (errorEvent.error is String) {
-            stackTrace = new StackTrace.fromString(errorEvent.error.toString());
-          } else {
-            try {
-              var nestedStackTrace = (errorEvent.error as JsError).stack;
-              if (stackTrace == null && nestedStackTrace != null) {
-                stackTrace = new StackTrace.fromString(nestedStackTrace.toString());
-              }
-
-              var nestedMessage = (errorEvent.error as JsError).message;
-              if (nestedMessage != null && nestedMessage.isNotEmpty) {
-                if (errorMsg == null) {
-                  errorMsg = nestedMessage;
-                } else if (!errorMsg.contains(nestedMessage)) {
-                  errorMsg += '\n $nestedMessage';
-                }
-              }
-            } catch (e) {
-              /// We are here because errorEvent.error is not a JsObject and JsInterop failed.
+      if (errorEvent.error != null) {
+        if (errorEvent.error is String) {
+          stackTrace = new StackTrace.fromString(errorEvent.error.toString());
+        } else {
+          try {
+            var nestedStackTrace = (errorEvent.error as JsError).stack;
+            if (stackTrace == null && nestedStackTrace != null) {
+              stackTrace = new StackTrace.fromString(nestedStackTrace.toString());
             }
 
-            if (errorMsg == null && errorEvent.error.toString().isNotEmpty) {
-              errorMsg = errorEvent.error.toString();
+            var nestedMessage = (errorEvent.error as JsError).message;
+            if (nestedMessage != null && nestedMessage.isNotEmpty) {
+              if (errorMsg == null) {
+                errorMsg = nestedMessage;
+              } else if (!errorMsg.contains(nestedMessage)) {
+                errorMsg += '\n $nestedMessage';
+              }
             }
+          } catch (e) {
+            /// We are here because errorEvent.error is not a JsObject and JsInterop failed.
+          }
+
+          if (errorMsg == null && errorEvent.error.toString().isNotEmpty) {
+            errorMsg = errorEvent.error.toString();
           }
         }
       }
-
-      if (errorMsg == null) {
-        errorMsg = errorEvent.toString();
-      }
-
-      loggingService.handleLogRecord(new log.LogRecord(log.Level.SEVERE, errorMsg, loggerName, errorData, stackTrace));
-    } catch (exception) {
-      if (errorEvent is html.ErrorEvent) {
-        errorData['message'] = errorEvent.message.toString();
-      }
-
-      errorMsg = 'The error from js was not parsed correctly, the errorData: ${errorData.toString()}';
-      loggingService.handleLogRecord(new log.LogRecord(log.Level.SEVERE, errorMsg, loggerName, exception));
     }
+
+    if (errorMsg == null) {
+      errorMsg = errorEvent.toString();
+    }
+
+    loggingService.handleLogRecord(new log.LogRecord(log.Level.SEVERE, errorMsg, loggerName, errorData, stackTrace));
   }
 }
