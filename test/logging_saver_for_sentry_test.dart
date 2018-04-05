@@ -1,12 +1,6 @@
 @TestOn('browser')
-import 'dart:async';
-import 'dart:html' as html;
-import 'dart:html_common' as html_common;
-
 import 'package:logging/logging.dart' as log;
-import 'package:logging_service/configure_logging_for_browser.dart';
 import 'package:logging_service/logging_saver_for_sentry.dart';
-import 'package:logging_service/logging_service.dart';
 import 'package:mockito/mockito.dart';
 import 'package:sentry_client/api_data/sentry_packet.dart';
 import 'package:sentry_client/sentry_client.dart';
@@ -33,22 +27,20 @@ void main() {
 
     test('extract info from Chain objects', () {
       var testTrace = new StackTrace.fromString(testStack);
-      var chain = new Chain([new Trace.from(testTrace), new Trace.from(testTrace)]);
-
       var record = new log.LogRecord(
         testLogLevel,
         testLogMsg,
         testLoggerName,
         null,
-        chain,
+        new Chain([new Trace.from(testTrace), new Trace.from(testTrace)]),
       );
 
       saver(record);
-      print(chain.toString());
-      print(chain.traces.first.original);
 
       // ignore: argument_type_not_assignable
       var packet = verify(sentryClientMock.write(captureAny)).captured.first as SentryPacket;
+      expect(packet.exceptionValues.length, 2);
+      expect(packet.exceptionValues.first.type, 'TestExceptionType');
     });
   });
 }
