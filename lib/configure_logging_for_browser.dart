@@ -78,7 +78,7 @@ class ConfigureLoggingForBrowser {
         return null;
       }
 
-      if (!preventDefault && isWeInDevNode()) {
+      if (!preventDefault && isDevMode()) {
         return null;
       }
 

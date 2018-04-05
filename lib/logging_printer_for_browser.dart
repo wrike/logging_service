@@ -36,7 +36,7 @@ class LoggingPrinterForBrowser {
       if (rec.error is Error && (rec.error as Error).stackTrace != null) {
         var stack = (rec.error as Error).stackTrace;
 
-        if (!isWeInDevNode()) {
+        if (!isDevMode()) {
           additionalInfo.add(_makeHeaderString('record.error.stackTrace.toString()'));
           additionalInfo.add(stack.toString());
         }
@@ -57,7 +57,7 @@ class LoggingPrinterForBrowser {
         stackTraceDesc += '<terse>';
       }
 
-      if (isWeInDevNode()) {
+      if (isDevMode()) {
         if (_shouldTerseErrorWhenPrint) {
           if (rec.stackTrace is Trace) {
             traceStrings.add((rec.stackTrace as Trace).terse.toString());
@@ -87,7 +87,7 @@ class LoggingPrinterForBrowser {
       additionalInfo.addAll(traceStrings);
     }
 
-    if (isWeInDevNode() && additionalInfo.isNotEmpty) {
+    if (isDevMode() && additionalInfo.isNotEmpty) {
       msg += '\n' + additionalInfo.join('\n');
     }
 
@@ -97,7 +97,7 @@ class LoggingPrinterForBrowser {
       _consoleProxy.log(msg);
     }
 
-    if (additionalInfo.isNotEmpty && !isWeInDevNode()) {
+    if (additionalInfo.isNotEmpty && !isDevMode()) {
       _consoleProxy.group('${rec.sequenceNumber}/${rec.level} Additional info:');
       for (var msg in additionalInfo) {
         _consoleProxy.log(msg);
