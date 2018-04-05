@@ -34,10 +34,10 @@ stackTrace: Exception
 
       windowMock = new WindowMock();
       when(windowMock.onError).thenReturn(onErrorStreamController.stream);
+      ConfigureLoggingForBrowser.listenJsErrors(loggingServiceMock, window: windowMock);
     });
 
     test('get the message from the error-event if it has the message field', () {
-      ConfigureLoggingForBrowser.listenJsErrors(loggingServiceMock, window: windowMock);
       var errorMock = new html.ErrorEvent('testType', <dynamic, dynamic>{'message': 'testMsg'});
 
       onErrorStreamController.add(errorMock);
@@ -47,8 +47,24 @@ stackTrace: Exception
       expect(rec.message, 'testMsg');
     });
 
+    test('asseble error-data from the error event', () {
+      var errorMock = new html.ErrorEvent('testType', <dynamic, dynamic>{
+        'message': 'testMsg',
+        'filename': 'test/file/name',
+        'lineno': 23,
+        'type': 'SomeTestType',
+        'timeStamp': 1231,
+      });
+
+      onErrorStreamController.add(errorMock);
+
+      // ignore: argument_type_not_assignable
+      var rec = verify(loggingServiceMock.handleLogRecord(captureAny)).captured.first as log.LogRecord;
+      expect(rec.error, new isInstanceOf<Map>());
+      expect((rec.error as Map).isNotEmpty, true);
+    });
+
     test('get the stack-trace from the nested error object if it exists', () {
-      ConfigureLoggingForBrowser.listenJsErrors(loggingServiceMock, window: windowMock);
       var errorMock = new html.ErrorEvent(
         'testType',
         <dynamic, dynamic>{
@@ -67,7 +83,6 @@ stackTrace: Exception
     });
 
     test('get the message from the the nested error object if there is no message at the first level', () {
-      ConfigureLoggingForBrowser.listenJsErrors(loggingServiceMock, window: windowMock);
       var errorMock = new html.ErrorEvent(
         'testType',
         <dynamic, dynamic>{
@@ -86,8 +101,6 @@ stackTrace: Exception
     });
 
     test('log message even if an error-event has an incorrect type', () {
-      ConfigureLoggingForBrowser.listenJsErrors(loggingServiceMock, window: windowMock);
-
       onErrorStreamController.add(null);
 
       // ignore: argument_type_not_assignable
