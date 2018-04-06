@@ -25,22 +25,63 @@ void main() {
       saver = new LoggingSaverForSentry(testAppVersionUid, sentryClientMock);
     });
 
-    test('extract info from Chain objects', () {
-      var testTrace = new StackTrace.fromString(testStack);
-      var record = new log.LogRecord(
-        testLogLevel,
-        testLogMsg,
-        testLoggerName,
-        null,
-        new Chain([new Trace.from(testTrace), new Trace.from(testTrace)]),
-      );
+    group('extract info from', () {
+      StackTrace testTrace;
 
-      saver(record);
+      setUp(() {
+        testTrace = new StackTrace.fromString(testStack);
+      });
 
-      // ignore: argument_type_not_assignable
-      var packet = verify(sentryClientMock.write(captureAny)).captured.first as SentryPacket;
-      expect(packet.exceptionValues.length, 2);
-      expect(packet.exceptionValues.first.type, 'TestExceptionType');
+      test('Chain objects', () {
+        var record = new log.LogRecord(
+          testLogLevel,
+          testLogMsg,
+          testLoggerName,
+          null,
+          new Chain([new Trace.from(testTrace), new Trace.from(testTrace)]),
+        );
+
+        saver(record);
+
+        // ignore: argument_type_not_assignable
+        var packet = verify(sentryClientMock.write(captureAny)).captured.first as SentryPacket;
+        expect(packet.exceptionValues.length, 2);
+        expect(packet.exceptionValues.first.type, 'TestExceptionType');
+      });
+
+      test('Trace objects', () {
+        var record = new log.LogRecord(
+          testLogLevel,
+          testLogMsg,
+          testLoggerName,
+          null,
+          new Trace.from(testTrace),
+        );
+
+        saver(record);
+
+        // ignore: argument_type_not_assignable
+        var packet = verify(sentryClientMock.write(captureAny)).captured.first as SentryPacket;
+        expect(packet.exceptionValues.length, 1);
+        expect(packet.exceptionValues.first.type, 'TestExceptionType');
+      });
+
+      test('StackTrace objects', () {
+        var record = new log.LogRecord(
+          testLogLevel,
+          testLogMsg,
+          testLoggerName,
+          null,
+          testTrace,
+        );
+
+        saver(record);
+
+        // ignore: argument_type_not_assignable
+        var packet = verify(sentryClientMock.write(captureAny)).captured.first as SentryPacket;
+        expect(packet.exceptionValues.length, 1);
+        expect(packet.exceptionValues.first.type, 'TestExceptionType');
+      });
     });
   });
 }
