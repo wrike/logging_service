@@ -1,60 +1,47 @@
-import 'dart:async';
+import 'logging_speed.dart';
+import 'src/clock.dart';
 
 class InfiniteLoopProtector {
-  final List<int> _recordTimes = [];
-  int _totalEventsCount = 0;
+  static final LoggingSpeed defaultMaxAllowedLoggingSpeed = new LoggingSpeed();
+  final List<int> _timeRecords = [];
   bool _isProtectionEnabled = false;
 
-  final int _speedControlInterval;
-  final int _maxAllowedSpeed;
-  final int _totalMaxCount;
-  final Duration _protectionDuration;
+  final Clock _clock;
+  final LoggingSpeed _maxSpeed;
 
   InfiniteLoopProtector(
-      {int speedControlInterval: 10,
-      int maxAllowedSpeedPerMinute: 10,
-      int totalMaxCount: 100,
-      Duration protectionDuration: const Duration(seconds: 5)})
-      : this._speedControlInterval = speedControlInterval,
-        this._maxAllowedSpeed = maxAllowedSpeedPerMinute,
-        this._totalMaxCount = totalMaxCount,
-        this._protectionDuration = protectionDuration;
+      {LoggingSpeed maxAllowedLoggingSpeed,
+      @deprecated Clock clock: const Clock() /*For internal use only*/,
+      @deprecated int maxAllowedSpeedPerMinute,
+      @deprecated int speedControlInterval,
+      @deprecated int totalMaxCount,
+      @deprecated Duration protectionDuration})
+      : this._maxSpeed = maxAllowedLoggingSpeed ?? defaultMaxAllowedLoggingSpeed,
+        this._clock = clock {}
 
   bool call(dynamic event) {
-    _totalEventsCount++;
-    _recordTimes.add(new DateTime.now().millisecondsSinceEpoch);
-
     if (_isProtectionEnabled) {
-      return false;
-    }
-
-    if (_shouldBeProtectedByMaxCount()) {
-      _isProtectionEnabled = true;
-
-      return false;
-    }
-
-    if (_isInsideOfControl() && _shouldBeProtectedBySpeed()) {
-      _isProtectionEnabled = true;
-      _recordTimes.clear();
-
-      new Future<Null>.delayed(_protectionDuration).then((_) {
+      if (_clock.getNow().millisecondsSinceEpoch - _timeRecords.first > _maxSpeed.timeInterval.inMilliseconds) {
         _isProtectionEnabled = false;
-      });
+        _timeRecords.clear();
+      } else {
+        return false;
+      }
+    }
 
-      return false;
+    _timeRecords.add(_clock.getNow().millisecondsSinceEpoch);
+
+    if (_timeRecords.length == _maxSpeed.eventsCount) {
+      if (_getSpeed() > _maxSpeed.eventsCount) {
+        _isProtectionEnabled = true;
+      } else {
+        _timeRecords.clear();
+      }
     }
 
     return true;
   }
 
-  //TODO: update constant value after the Dart 2.0 release
   double _getSpeed() =>
-      _recordTimes.length / ((_recordTimes.last - _recordTimes.first) / 60000 /*Duration.MILLISECONDS_PER_MINUTE)*/);
-
-  bool _isInsideOfControl() => _speedControlInterval <= 0 || _recordTimes.length > _speedControlInterval;
-
-  bool _shouldBeProtectedByMaxCount() => _totalMaxCount > 0 && _totalEventsCount > _totalMaxCount;
-
-  bool _shouldBeProtectedBySpeed() => _maxAllowedSpeed > 0 && _getSpeed() > _maxAllowedSpeed;
+      _timeRecords.length / ((_timeRecords.last - _timeRecords.first) / _maxSpeed.timeInterval.inMilliseconds);
 }
