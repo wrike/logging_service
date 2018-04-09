@@ -17,7 +17,8 @@ class InfiniteLoopProtector {
       @deprecated int totalMaxCount,
       @deprecated Duration protectionDuration})
       : this._maxSpeed = maxAllowedLoggingSpeed ?? defaultMaxAllowedLoggingSpeed,
-        this._clock = clock {}
+        // ignore: deprecated_member_use
+        this._clock = clock;
 
   bool call(dynamic event) {
     if (_isProtectionEnabled) {

@@ -24,6 +24,7 @@ void main() {
       var start = new DateTime.now();
       var clockMock = new ClockMock();
       when(clockMock.getNow()).thenReturn(start);
+      // ignore: deprecated_member_use
       var protector = new InfiniteLoopProtector(clock: clockMock);
       var events = new List.generate(LoggingSpeed.defaultEventsCount, (_) => new Object());
 
@@ -38,6 +39,7 @@ void main() {
       var start = new DateTime.now();
       var clockMock = new ClockMock();
       when(clockMock.getNow()).thenReturn(start);
+      // ignore: deprecated_member_use
       var protector = new InfiniteLoopProtector(clock: clockMock);
       var events = new List.generate(LoggingSpeed.defaultEventsCount, (_) => new Object());
 
@@ -68,6 +70,7 @@ void main() {
       var start = new DateTime.now();
       var clockMock = new ClockMock();
       when(clockMock.getNow()).thenReturn(start);
+      // ignore: deprecated_member_use
       var protector = new InfiniteLoopProtector(clock: clockMock);
       var events = new List.generate(LoggingSpeed.defaultEventsCount - 1, (_) => new Object());
 
