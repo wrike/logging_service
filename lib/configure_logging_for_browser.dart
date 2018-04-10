@@ -1,18 +1,20 @@
 import 'dart:convert';
 import 'dart:html' as html;
-import 'dart:js';
 
 import 'package:logging/logging.dart' as log;
-import 'package:logging_service/infinite_loop_protector.dart';
-import 'package:logging_service/src/js_console_proxy.dart';
 import 'package:sentry_client/sentry_client_browser.dart';
 import 'package:sentry_client/sentry_dsn.dart';
 
+import 'infinite_loop_protector.dart';
 import 'logging_printer_for_browser.dart';
 import 'logging_saver_for_sentry.dart';
 import 'logging_service.dart';
+import 'protector.dart';
 import 'sentry_pre_save_for_browser.dart';
+import 'src/dev_mode.dart';
+import 'src/js_console_proxy.dart';
 import 'src/js_pre_start_errors_list_utils.dart';
+import 'src/js_utils.dart';
 
 const _json = const JsonCodec();
 
@@ -26,8 +28,19 @@ class ConfigureLoggingForBrowser {
   static void collectPreStartJsErrors(LoggingService loggingService) {
     if (loggingServiceJsPreStartErrorsList is List) {
       loggingServiceJsPreStartErrorsList.forEach((error) {
-        loggingService.handleLogRecord(new log.LogRecord(log.Level.SEVERE, error.error.toString(),
-            'jsPreStartUnhandledErrorLogger', error.error, new StackTrace.fromString(error.error.stack)));
+        if (error is! html.Event) {
+          loggingService.handleLogRecord(
+            new log.LogRecord(
+              log.Level.SEVERE,
+              'collectPreStartJsErrors: the error event has incorrect type: ${error.runtimeType}/${error.toString()}',
+              'jsPreStartUnhandledErrorLogger',
+              error,
+            ),
+          );
+          return null;
+        }
+
+        _handleJsError(error as html.Event, loggingService, 'jsPreStartUnhandledErrorLogger');
       });
       loggingServiceIsJsPreStartErrorSavingEnabled = false;
       loggingServiceJsPreStartErrorsList.clear();
@@ -35,15 +48,16 @@ class ConfigureLoggingForBrowser {
   }
 
   static void listenJsErrors(LoggingService loggingService,
-      {bool preventDefault, html.Window window, Protector infiniteLoopProtector}) {
-    var isDevMode = false;
-    assert(isDevMode = true);
-
-    preventDefault = preventDefault ?? !isDevMode;
+      {bool preventDefault: true, html.Window window, Protector infiniteLoopProtector}) {
     window = window ?? html.window;
     infiniteLoopProtector = infiniteLoopProtector ?? _defaultProtector;
 
     window.onError.listen((html.Event error) {
+      if (!RepeatProtector.shouldBeHandled(error)) {
+        _consoleProxy.error('The handling of js-errors was disabled by the repeat-protector');
+        return null;
+      }
+
       if (error is! html.Event) {
         loggingService.handleLogRecord(
           new log.LogRecord(
@@ -61,53 +75,15 @@ class ConfigureLoggingForBrowser {
       }
 
       if (infiniteLoopProtector != null && !infiniteLoopProtector(error)) {
-        _consoleProxy.log('The handling of js-errors was disabled by the infinity-loop protector');
+        _consoleProxy.error('The handling of js-errors was disabled by the infinity-loop protector');
         return null;
       }
 
-      try {
-        String errorMsg;
-
-        var jsError = new JsObject.fromBrowserObject(error);
-
-        if (jsError['message'] != null && jsError['message'].toString().isNotEmpty) {
-          errorMsg = jsError['message'].toString();
-        }
-
-        StackTrace stackTrace;
-        if (jsError['error'] != null) {
-          var nestedJsError = new JsObject.fromBrowserObject(jsError['error']);
-          if (nestedJsError['stack'] != null) {
-            stackTrace = new StackTrace.fromString(nestedJsError['stack'].toString());
-          }
-          if (errorMsg == null && nestedJsError['message'] != null) {
-            errorMsg = nestedJsError['message'].toString();
-          }
-        }
-
-        if (errorMsg == null) {
-          errorMsg = error.toString();
-        }
-
-        loggingService.handleLogRecord(
-          new log.LogRecord(
-            log.Level.SEVERE,
-            errorMsg,
-            'jsUnhandledErrorLogger',
-            error,
-            stackTrace,
-          ),
-        );
-      } catch (e) {
-        loggingService.handleLogRecord(
-          new log.LogRecord(
-            log.Level.SEVERE,
-            'The error from js was not parsed correctly, the error: ${error.toString()}',
-            'jsUnhandledErrorLogger',
-            e,
-          ),
-        );
+      if (!preventDefault && isDevMode()) {
+        return null;
       }
+
+      _handleJsError(error, loggingService, 'jsUnhandledErrorLogger');
     });
   }
 
@@ -173,8 +149,62 @@ class ConfigureLoggingForBrowser {
     }
 
     setLogLevelsFromUrl(loggingService);
-    listenJsErrors(loggingService,
-        preventDefault: preventDefaultJsError, infiniteLoopProtector: jsInfiniteLoopProtector);
+    listenJsErrors(
+      loggingService,
+      preventDefault: preventDefaultJsError,
+      infiniteLoopProtector: jsInfiniteLoopProtector,
+    );
     collectPreStartJsErrors(loggingService);
+  }
+
+  static void _handleJsError(html.Event errorEvent, LoggingService loggingService, String loggerName) {
+    String errorMsg;
+    var errorData = <String, String>{};
+    StackTrace stackTrace;
+
+    if (errorEvent is html.ErrorEvent) {
+      errorData['filename'] = errorEvent.filename;
+      errorData['lineno'] = errorEvent.lineno.toString();
+      errorData['type'] = errorEvent.type;
+      errorData['timeStamp'] = errorEvent.timeStamp.toString();
+
+      if (errorEvent.message != null && errorEvent.message.toString().isNotEmpty) {
+        errorMsg = errorEvent.message.toString();
+      }
+
+      if (errorEvent.error != null) {
+        if (errorEvent.error is String) {
+          stackTrace = new StackTrace.fromString(errorEvent.error.toString());
+        } else {
+          try {
+            var nestedStackTrace = (errorEvent.error as JsError).stack;
+            if (stackTrace == null && nestedStackTrace != null) {
+              stackTrace = new StackTrace.fromString(nestedStackTrace.toString());
+            }
+
+            var nestedMessage = (errorEvent.error as JsError).message;
+            if (nestedMessage != null && nestedMessage.isNotEmpty) {
+              if (errorMsg == null) {
+                errorMsg = nestedMessage;
+              } else if (!errorMsg.contains(nestedMessage)) {
+                errorMsg += '\n $nestedMessage';
+              }
+            }
+          } catch (e) {
+            /// We are here because errorEvent.error is not a JsObject and JsInterop failed.
+          }
+
+          if (errorMsg == null && errorEvent.error.toString().isNotEmpty) {
+            errorMsg = errorEvent.error.toString();
+          }
+        }
+      }
+    }
+
+    if (errorMsg == null) {
+      errorMsg = errorEvent.toString();
+    }
+
+    loggingService.handleLogRecord(new log.LogRecord(log.Level.SEVERE, errorMsg, loggerName, errorData, stackTrace));
   }
 }

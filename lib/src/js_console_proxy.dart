@@ -13,6 +13,8 @@ class JsConsoleProxy {
 
   void log(String msg) => _writeToConsole(_LogLevel.Log, msg);
 
+  bool _doesExist(dynamic method) => loggingServiceOriginalConsoleContainer != null && method != null;
+
   void _writeToConsole(_LogLevel level, String msg) {
     switch (level) {
       case _LogLevel.Error:
@@ -38,8 +40,6 @@ class JsConsoleProxy {
         break;
     }
   }
-
-  bool _doesExist(dynamic method) => loggingServiceOriginalConsoleContainer != null && method != null;
 }
 
 enum _LogLevel { Error, Info, Log }

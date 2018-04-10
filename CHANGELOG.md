@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.2.0
+- Improve display errors experience
+
 ## 3.1.1
 - Fix a type error inside the window.onError callback #4
 
