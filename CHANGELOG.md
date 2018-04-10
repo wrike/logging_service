@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.2.1
+- Fix README
+
 ## 3.2.0
 - Improve display errors experience
 

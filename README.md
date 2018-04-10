@@ -30,7 +30,8 @@ loggingService.runProtected(() {
   logger1.info('Some info');
   
   var logger2 = new Logger('myModuleName2');
-  logger2.shout('Some error! We should fix it!')
+  logger2.severe('Some error! We should fix it!')
+  logger2.shout('Some dev-message')
 });
 ```
 
@@ -38,16 +39,16 @@ loggingService.runProtected(() {
 
 1. You can manage log level per module:  
 By code: `LoggingService.setLogLevelPerLogger(String loggerName, log.Level level)`  
-In runtime by adding the hash parameter to your app-url: `#logging={"myModuleName": "SHOUT"}`    
+In runtime by adding the hash parameter to your app-url: `#logging={"myModuleName": "SEVERE"}`
 `myModuleName` should be the name that you used when you created `new Logger('myModuleName');`  
 
-By default you will see in the browser console only `Level.SHOUT` and higher levels of messages.  
+By default you will see in the browser console only `Level.SEVERE` and higher levels of messages.
 But if you want to change it you can manage the base level for the whole application:  
 By code: `LoggingService.setLogLevelPerLogger(LoggingService.ROOT_LOG_LEVEL_KEY, log.Level level)`    
 or to set it with the call of: `loggingService.start(rootLogLevel: Level.INFO)`  
 In runtime by adding the hash parameter to your app-url: `#logging={"rootLogLevel": "INFO"}`  
 
-2. You `SHOUT` messages are being saved to the sentry server:  
+2. You `SEVERE` messages are being saved to the sentry server:
 If you put the `appVersionUid` and `sentryDsn` arguments to the `ConfigureLoggingForBrowser.setUpAll()` call.  
 Or if you configured saver manually `loggingService.addLoggingSavers([new LoggingSaverForSentry(...)]);`  
 You can change the level for what message is being sent to the savers by changing the `savableLogLevel` arg for the 
@@ -85,15 +86,21 @@ class AppExceptionHandler implements ExceptionHandler {
 
   @override
   void call(dynamic error, [dynamic stackTrace, String reason]) {
-    var message = reason ?? error.toString();
+        if (stackTrace is Iterable) {
+          stackTrace = new Chain((stackTrace as Iterable).map((dynamic trace) => new Trace.parse(trace.toString())));
+        } else {
+          stackTrace = new Trace.parse(stackTrace.toString());
+        }
 
-    if (stackTrace is Iterable) {
-      stackTrace = new Chain((stackTrace as Iterable).map((dynamic trace) => new Trace.parse(trace.toString())));
-    } else {
-      stackTrace = new Trace.parse(stackTrace.toString());
-    }
-
-    _loggingService.handleLogRecord(new log.LogRecord(log.Level.SHOUT, message, 'ngErrorLogger', error, stackTrace));
+        _loggingService.handleLogRecord(
+          new log.LogRecord(
+            log.Level.SEVERE,
+            reason,
+            'ngErrorLogger',
+            error,
+            stackTrace as StackTrace,
+          ),
+        );
   }
 }
 ```
