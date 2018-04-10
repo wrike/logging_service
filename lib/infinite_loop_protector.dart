@@ -33,7 +33,7 @@ class InfiniteLoopProtector {
     _timeRecords.add(_clock.getNow().millisecondsSinceEpoch);
 
     if (_timeRecords.length == _maxSpeed.eventsCount) {
-      if (_getSpeed() > _maxSpeed.eventsCount) {
+      if (_timeRecords.last - _timeRecords.first < _maxSpeed.timeInterval.inMilliseconds) {
         _isProtectionEnabled = true;
       } else {
         _timeRecords.clear();
@@ -42,7 +42,4 @@ class InfiniteLoopProtector {
 
     return true;
   }
-
-  double _getSpeed() =>
-      _timeRecords.length / ((_timeRecords.last - _timeRecords.first) / _maxSpeed.timeInterval.inMilliseconds);
 }
