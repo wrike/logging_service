@@ -54,6 +54,7 @@ class ConfigureLoggingForBrowser {
 
     window.onError.listen((html.Event error) {
       if (!RepeatProtector.shouldBeHandled(error)) {
+        _consoleProxy.error('The handling of js-errors was disabled by the repeat-protector');
         return null;
       }
 
@@ -74,7 +75,7 @@ class ConfigureLoggingForBrowser {
       }
 
       if (infiniteLoopProtector != null && !infiniteLoopProtector(error)) {
-        _consoleProxy.log('The handling of js-errors was disabled by the infinity-loop protector');
+        _consoleProxy.error('The handling of js-errors was disabled by the infinity-loop protector');
         return null;
       }
 
