@@ -18,22 +18,36 @@ class JsConsoleProxy {
   void _writeToConsole(_LogLevel level, String msg) {
     switch (level) {
       case _LogLevel.Error:
-        if (_doesExist(LoggingServiceOriginalConsoleMethods.error)) {
-          LoggingServiceOriginalConsoleMethods.error(msg);
+        var errorMethod = null;
+        try {
+          errorMethod = LoggingServiceOriginalConsoleMethods.error;
+        } catch (e) {
+        }
+        if (_doesExist(errorMethod)) {
+          errorMethod(msg);
         } else {
           html.window.console.error(msg);
         }
         break;
       case _LogLevel.Info:
-        if (_doesExist(LoggingServiceOriginalConsoleMethods.info)) {
-          LoggingServiceOriginalConsoleMethods.info(msg);
+        var infoMethod = null;
+        try {
+          infoMethod = LoggingServiceOriginalConsoleMethods.info;
+        } catch (e) {
+        }
+        if (_doesExist(infoMethod)) {
+          infoMethod(msg);
         } else {
           html.window.console.info(msg);
         }
         break;
       case _LogLevel.Log:
-        if (_doesExist(LoggingServiceOriginalConsoleMethods.log)) {
-          LoggingServiceOriginalConsoleMethods.log(msg);
+        var logMethod = null;
+        try {
+          logMethod = LoggingServiceOriginalConsoleMethods.log;} catch (e) {
+        }
+        if (_doesExist(logMethod)) {
+          logMethod(msg);
         } else {
           html.window.console.log(msg);
         }
