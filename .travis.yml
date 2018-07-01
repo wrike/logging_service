@@ -4,31 +4,32 @@ addons:
   chrome: stable
 matrix:
   include:
-    - dart: dev
-      script:
-        - dartanalyzer --fatal-infos --fatal-lints --fatal-warnings lib/ test/
-    - dart: dev
-      script:
-        - dartfmt --set-exit-if-changed -l 120 -n .
-    - dart: dev
-      dart_task:
-        test: --platform firefox -j 1
-    - dart: dev
-      dart_task:
-        test: --platform chrome
 #    - dart: dev
 #      script:
-#        - pub run dart_dev coverage --no-html --no-open
-#        - bash <(curl -s https://codecov.io/bash) -f coverage/coverage.lcov
-    - dart: dev
+#        - dartanalyzer --fatal-infos --fatal-lints --fatal-warnings lib/ test/
+#    - dart: dev
+#      script:
+#        - dartfmt --set-exit-if-changed -l 120 -n .
+#    - dart: dev
+#      dart_task:
+#        test: --platform firefox -j 1
+#    - dart: dev
+#      dart_task:
+#        test: --platform chrome
+    - dart: 2.0.0-dev.64.1
       script:
-        - pub get --packages-dir
-        - pub global activate coverage
-        - pub global run coverage:collect_coverage --port=8111 -o coverage.json --resume-isolates --wait-paused &
-        - dart --observe=8111 test/coverage.dart
-        - pub global run coverage:format_coverage --package-root=packages --report-on lib --in coverage.json --out lcov.info --lcov
-      after_success:
-        - bash <(curl -s https://codecov.io/bash)
+        - export DART_VM_OPTIONS=--no-preview-dart2
+        - pub run dart_dev coverage --no-html --no-open --no-checked
+        - bash <(curl -s https://codecov.io/bash) -f coverage/coverage.lcov
+#    - dart: dev
+#      script:
+#        - pub get --packages-dir
+#        - pub global activate coverage
+#        - pub global run coverage:collect_coverage --port=8111 -o coverage.json --resume-isolates --wait-paused &
+#        - pub run test --observe=8111
+#        - pub global run coverage:format_coverage --package-root=packages --report-on lib --in coverage.json --out lcov.info --lcov
+#      after_success:
+#        - bash <(curl -s https://codecov.io/bash)
 # Only building master means that we don't run two builds for each pull request.
 branches:
   only: [master]
