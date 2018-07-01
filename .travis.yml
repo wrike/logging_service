@@ -16,7 +16,7 @@ matrix:
 #    - dart: dev
 #      dart_task:
 #        test: --platform chrome
-    - dart: 2.0.0-dev.63.0
+    - dart: 2.0.0-dev.50.0
       script:
         - pub run dart_dev coverage
         - bash <(curl -s https://codecov.io/bash) -f coverage/coverage.lcov

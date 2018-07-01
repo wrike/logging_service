@@ -5,7 +5,7 @@ authors:
   - Ivan Evsikov <ivan.evsikov@team.wrike.com>
 homepage: https://github.com/wrike/logging_service
 environment:
-  sdk: '>=2.0.0-dev.54'
+  sdk: '>=2.0.0-dev.50'
 
 dependencies:
   logging: ^0.11.0
