@@ -8,7 +8,8 @@ matrix:
       dart_task:
         dartanalyzer: --fatal-warnings lib/ test/
     - dart: dev
-      dart_task: dartfmt
+      dart_task:
+        dartfmt: --set-exit-if-changed -l 120 -n .
 #TODO: enable after Dart 2 release
 #    - dart: dev
 #      script:
