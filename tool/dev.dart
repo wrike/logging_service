@@ -13,7 +13,7 @@ Future main(List<String> args) async {
     ..lineLength = 120;
 
   config.coverage
-    ..html = true
+    ..html = false
     ..reportOn = const ['lib/']
     ..pubServe = true;
 

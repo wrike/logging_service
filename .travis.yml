@@ -18,8 +18,7 @@ matrix:
 #        test: --platform chrome
     - dart: 2.0.0-dev.63.0
       script:
-        - export DART_VM_OPTIONS=--no-preview-dart2
-        - pub run dart_dev coverage --no-html --no-open --no-checked
+        - pub run dart_dev coverage
         - bash <(curl -s https://codecov.io/bash) -f coverage/coverage.lcov
 #    - dart: dev
 #      script:
