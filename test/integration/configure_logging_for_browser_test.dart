@@ -14,15 +14,15 @@ import '../test_stacks.dart';
 void main() {
   group('listenJsErrors should', () {
     LoggingServiceMock loggingServiceMock;
-    StreamController<dynamic> onErrorStreamController;
+    StreamController<html.Event> onErrorStreamController;
     WindowMock windowMock;
 
     setUp(() {
       loggingServiceMock = new LoggingServiceMock();
-      onErrorStreamController = new StreamController<dynamic>.broadcast(sync: true);
+      onErrorStreamController = new StreamController<html.Event>.broadcast(sync: true);
 
       windowMock = new WindowMock();
-      when(windowMock.onError).thenReturn(onErrorStreamController.stream);
+      when(windowMock.onError).thenAnswer((_) => onErrorStreamController.stream);
       ConfigureLoggingForBrowser.listenJsErrors(loggingServiceMock, window: windowMock);
     });
 
@@ -31,7 +31,6 @@ void main() {
 
       onErrorStreamController.add(errorMock);
 
-      // ignore: argument_type_not_assignable
       var rec = verify(loggingServiceMock.handleLogRecord(captureAny)).captured.first as log.LogRecord;
       expect(rec.message, 'testMsg');
     });
@@ -49,7 +48,7 @@ void main() {
 
       // ignore: argument_type_not_assignable
       var rec = verify(loggingServiceMock.handleLogRecord(captureAny)).captured.first as log.LogRecord;
-      expect(rec.error, new isInstanceOf<Map>());
+      expect(rec.error, new TypeMatcher<Map>());
       expect((rec.error as Map).isNotEmpty, true);
     });
 
