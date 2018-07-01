@@ -31,7 +31,6 @@ void main() {
 
       onErrorStreamController.add(errorMock);
 
-      // ignore: argument_type_not_assignable
       var rec = verify(loggingServiceMock.handleLogRecord(captureAny)).captured.first as log.LogRecord;
       expect(rec.message, 'testMsg');
     });
@@ -47,9 +46,8 @@ void main() {
 
       onErrorStreamController.add(errorMock);
 
-      // ignore: argument_type_not_assignable
       var rec = verify(loggingServiceMock.handleLogRecord(captureAny)).captured.first as log.LogRecord;
-      expect(rec.error, new isInstanceOf<Map>());
+      expect(rec.error, new TypeMatcher<Map>());
       expect((rec.error as Map).isNotEmpty, true);
     });
 
@@ -61,7 +59,6 @@ void main() {
 
       onErrorStreamController.add(errorMock);
 
-      // ignore: argument_type_not_assignable
       verify(loggingServiceMock.handleLogRecord(captureAny)).called(1);
     });
 
@@ -75,7 +72,6 @@ void main() {
 
       onErrorStreamController.add(errorMock);
 
-      // ignore: argument_type_not_assignable
       var rec = verify(loggingServiceMock.handleLogRecord(captureAny)).captured.first as log.LogRecord;
       expect(rec.message, contains('additional testMsg'));
     });
@@ -90,7 +86,6 @@ void main() {
 
       onErrorStreamController.add(errorMock);
 
-      // ignore: argument_type_not_assignable
       var rec = verify(loggingServiceMock.handleLogRecord(captureAny)).captured.first as log.LogRecord;
       expect('testMsg'.allMatches(rec.message).toList().length, 1);
     });
@@ -108,7 +103,6 @@ void main() {
 
       onErrorStreamController.add(errorMock);
 
-      // ignore: argument_type_not_assignable
       var rec = verify(loggingServiceMock.handleLogRecord(captureAny)).captured.first as log.LogRecord;
       expect(rec.stackTrace.toString(), testStack);
     });
@@ -126,7 +120,6 @@ void main() {
 
       onErrorStreamController.add(errorMock);
 
-      // ignore: argument_type_not_assignable
       var rec = verify(loggingServiceMock.handleLogRecord(captureAny)).captured.first as log.LogRecord;
       expect(rec.message, 'nestedTestMsg');
     });
@@ -134,7 +127,6 @@ void main() {
     test('log message even if an error-event has an incorrect type', () {
       onErrorStreamController.add(null);
 
-      // ignore: argument_type_not_assignable
       verify(loggingServiceMock.handleLogRecord(captureAny)).called(1);
     });
   });

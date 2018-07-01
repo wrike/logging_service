@@ -5,7 +5,7 @@ authors:
   - Ivan Evsikov <ivan.evsikov@team.wrike.com>
 homepage: https://github.com/wrike/logging_service
 environment:
-  sdk: '>=1.21.1 <2.0.0'
+  sdk: '>=2.0.0-dev.54'
 
 dependencies:
   logging: ^0.11.0
@@ -16,11 +16,8 @@ dependencies:
 dev_dependencies:
   test: '>=0.12.15 <2.0.0'
   coverage: '>=0.7.9 <2.0.0'
-  mockito: '>=2.0.0 <4.0.0'
+  mockito: '>=3.0.0-beta+1 <4.0.0'
   quiver: '>=0.21.4 <2.0.0'
-  dart_dev: '>=1.7.2 <3.0.0'
-  #TODO: disabled because we can not resolve dependencies with it
-  #dart_style: ^1.0.7
 
 transformers:
   - test/pub_serve:
