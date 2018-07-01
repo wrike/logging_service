@@ -8,8 +8,7 @@ matrix:
       dart_task:
         dartanalyzer: --fatal-warnings lib/ test/
     - dart: dev
-      dart_task:
-        - dartfmt
+      dart_task: dartfmt
 #TODO: enable after Dart 2 release
 #    - dart: dev
 #      script:
@@ -27,9 +26,12 @@ matrix:
         - pub run dart_dev analyze
     - dart: stable
       dart_task:
+        test: --platform chrome
+    - dart: 1.24.2
+      dart_task:
         test: --platform dartium
         install_dartium: true
-    - dart: stable
+    - dart: 1.24.2
       with_content_shell: true
       before_install:
         - export DISPLAY=:99.0
