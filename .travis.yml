@@ -16,7 +16,7 @@ matrix:
 #    - dart: dev
 #      dart_task:
 #        test: --platform chrome
-    - dart: 2.0.0-dev.64.1
+    - dart: 2.0.0-dev.63.0
       script:
         - export DART_VM_OPTIONS=--no-preview-dart2
         - pub run dart_dev coverage --no-html --no-open --no-checked
