@@ -31,6 +31,7 @@ void main() {
 
       onErrorStreamController.add(errorMock);
 
+      // ignore: argument_type_not_assignable
       var rec = verify(loggingServiceMock.handleLogRecord(captureAny)).captured.first as log.LogRecord;
       expect(rec.message, 'testMsg');
     });
@@ -48,7 +49,7 @@ void main() {
 
       // ignore: argument_type_not_assignable
       var rec = verify(loggingServiceMock.handleLogRecord(captureAny)).captured.first as log.LogRecord;
-      expect(rec.error, new TypeMatcher<Map>());
+      expect(rec.error, new isInstanceOf<Map>());
       expect((rec.error as Map).isNotEmpty, true);
     });
 

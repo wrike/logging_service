@@ -5,10 +5,17 @@ addons:
 matrix:
   include:
     - dart: dev
-      script:
-        - pub run dart_dev analyze
-        #TODO: disabled because we can not resolve dependencies with dart_style: ^1.0.7
-        #- pub run dart_dev format --check
+      dart_task:
+        dartanalyzer: --fatal-warnings lib/ test/
+    - dart: dev
+      dart_task:
+        - dartfmt
+#TODO: enable after Dart 2 release
+#    - dart: dev
+#      script:
+#        - pub run dart_dev analyze
+#        #TODO: disabled because we can not resolve dependencies with dart_style: ^1.0.7
+#        #- pub run dart_dev format --check
     - dart: dev
       dart_task:
         test: --platform firefox -j 1
@@ -31,6 +38,9 @@ matrix:
       script:
         - pub run dart_dev coverage --no-html
         - bash <(curl -s https://codecov.io/bash) -f coverage/coverage.lcov
+# Only building master means that we don't run two builds for each pull request.
+branches:
+  only: [master]
 cache:
   directories:
     - $HOME/.pub-cache
