@@ -17,10 +17,10 @@ matrix:
       dart_task:
         test: --platform chrome
     #TODO: does not work
-    - dart: dev
-      script:
-        - pub run dart_dev coverage
-        - bash <(curl -s https://codecov.io/bash) -f coverage/coverage.lcov
+#    - dart: dev
+#      script:
+#        - pub run dart_dev coverage
+#        - bash <(curl -s https://codecov.io/bash) -f coverage/coverage.lcov
 # Only building master means that we don't run two builds for each pull request.
 branches:
   only: [master]
