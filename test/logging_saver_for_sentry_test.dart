@@ -43,7 +43,6 @@ void main() {
 
         saver(record);
 
-        // ignore: argument_type_not_assignable
         var packet = verify(sentryClientMock.write(captureAny)).captured.first as SentryPacket;
         expect(packet.exceptionValues.length, 2);
         expect(packet.exceptionValues.first.type, 'TestExceptionType');
@@ -60,7 +59,6 @@ void main() {
 
         saver(record);
 
-        // ignore: argument_type_not_assignable
         var packet = verify(sentryClientMock.write(captureAny)).captured.first as SentryPacket;
         expect(packet.exceptionValues.length, 1);
         expect(packet.exceptionValues.first.type, 'TestExceptionType');
@@ -77,7 +75,6 @@ void main() {
 
         saver(record);
 
-        // ignore: argument_type_not_assignable
         var packet = verify(sentryClientMock.write(captureAny)).captured.first as SentryPacket;
         expect(packet.exceptionValues.length, 1);
         expect(packet.exceptionValues.first.type, 'TestExceptionType');

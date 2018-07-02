@@ -89,8 +89,11 @@ class ConfigureLoggingForBrowser {
 
   static void setLogLevelsFromUrl(LoggingService loggingService, {html.Window window}) {
     window = window ?? html.window;
-    // ignore: strong_mode_uses_dynamic_as_bottom
-    final _levelNames = new Map.fromIterable(log.Level.LEVELS, key: (log.Level l) => l.name, value: (log.Level l) => l);
+
+    final _levelNames = new Map<String, log.Level>.fromIterables(
+      log.Level.LEVELS.map((log.Level l) => l.name),
+      log.Level.LEVELS.map((log.Level l) => l),
+    );
 
     final applyLogLevel = () {
       final hash = window.location.hash.replaceFirst('#', '');

@@ -11,7 +11,6 @@ TestExceptionType:
     at http://localhost:8080/integration/configure_logging_for_browser_test.dart.js:10733:3
   ''';
 
-
 const List<String> testStacks = const [
   r'''
 dart:core                                                      Object.noSuchMethod
