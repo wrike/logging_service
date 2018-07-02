@@ -30,8 +30,8 @@ loggingService.runProtected(() {
   logger1.info('Some info');
   
   var logger2 = new Logger('myModuleName2');
-  logger2.severe('Some error! We should fix it!')
-  logger2.shout('Some dev-message')
+  logger2.severe('Some error! We should fix it!');
+  logger2.shout('Some dev-message');
 });
 ```
 
