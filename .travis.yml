@@ -17,6 +17,15 @@ matrix:
     - dart: dev
       dart_task:
         test: --platform chrome
+    - dart: stable
+      script:
+        - dartanalyzer --fatal-infos --fatal-lints --fatal-warnings lib/ test/
+    - dart: stable
+      dart_task:
+        test: --platform firefox -j 1
+    - dart: stable
+      dart_task:
+        test: --platform chrome
     #TODO: does not work
 #    - dart: dev
 #      script:
