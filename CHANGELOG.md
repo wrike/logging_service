@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.2.3
+- Fixes for the last Dart
+
 ## 3.2.2
 - Dart 2 fixes
 
