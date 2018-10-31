@@ -1,7 +1,10 @@
 # Changelog
 
-## 3.2.3
+## 3.2.4
 - Fix cast error when configuring logger via url hash params
+
+## 3.2.3
+- Fixes for the last Dart
 
 ## 3.2.2
 - Dart 2 fixes
