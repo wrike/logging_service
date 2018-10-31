@@ -102,7 +102,7 @@ class ConfigureLoggingForBrowser {
       if (query.isNotEmpty && query.containsKey(LOG_URL_ARG_NAME)) {
         final argsRaw = query[LOG_URL_ARG_NAME];
 
-        final args = _json.decode(argsRaw) as Map<String, String>;
+        final args = (_json.decode(argsRaw) as Map).cast<String, String>();
 
         args.forEach((String loggerName, String level) {
           if (_levelNames.containsKey(level)) {
