@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.2.5
+- Do not send empty exceptions to Sentry
+
 ## 3.2.4
 - Fix cast error when configuring logger via url hash params
 
