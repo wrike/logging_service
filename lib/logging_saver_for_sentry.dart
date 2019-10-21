@@ -24,7 +24,7 @@ class LoggingSaverForSentry {
   }
 
   void call(log.LogRecord rec) {
-    if (_sentry == null) {
+    if (_sentry == null || rec.stackTrace == null) {
       return;
     }
 
