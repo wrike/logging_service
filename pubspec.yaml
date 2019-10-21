@@ -1,5 +1,5 @@
 name: logging_service
-version: 3.2.4
+version: 3.2.5
 description: The service for advanced work with logging
 authors:
   - Ivan Evsikov <ivan.evsikov@team.wrike.com>
@@ -22,7 +22,3 @@ dev_dependencies:
   build_runner: '>=0.9.1 <2.0.0'
   build_test: '>=0.10.2 <2.0.0'
   build_web_compilers: '>=0.4.0 <2.0.0'
-
-transformers:
-  - test/pub_serve:
-      $include: test/**_test{.*,}.dart
