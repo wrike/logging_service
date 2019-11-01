@@ -48,43 +48,45 @@ class ConfigureLoggingForBrowser {
   }
 
   static void listenJsErrors(LoggingService loggingService,
-      {bool preventDefault: true, html.Window window, Protector infiniteLoopProtector}) {
+    {bool preventDefault: true, html.Window window, Protector infiniteLoopProtector, bool ignoreJsErrors}) {
     window = window ?? html.window;
     infiniteLoopProtector = infiniteLoopProtector ?? _defaultProtector;
 
-    window.onError.listen((html.Event error) {
-      if (!RepeatProtector.shouldBeHandled(error)) {
-        _consoleProxy.error('The handling of js-errors was disabled by the repeat-protector');
-        return null;
-      }
+    if (!ignoreJsErrors) {
+      window.onError.listen((html.Event error) {
+        if (!RepeatProtector.shouldBeHandled(error)) {
+          _consoleProxy.error('The handling of js-errors was disabled by the repeat-protector');
+          return null;
+        }
 
-      if (error is! html.Event) {
-        loggingService.handleLogRecord(
-          new log.LogRecord(
-            log.Level.SEVERE,
-            'window.onError was called with incorrect arguments, the error event: ${error.toString()}',
-            'jsUnhandledErrorLogger',
-            error,
-          ),
-        );
-        return null;
-      }
+        if (error is! html.Event) {
+          loggingService.handleLogRecord(
+            new log.LogRecord(
+              log.Level.SEVERE,
+              'window.onError was called with incorrect arguments, the error event: ${error.toString()}',
+              'jsUnhandledErrorLogger',
+              error,
+            ),
+          );
+          return null;
+        }
 
-      if (preventDefault) {
-        error.preventDefault();
-      }
+        if (preventDefault) {
+          error.preventDefault();
+        }
 
-      if (infiniteLoopProtector != null && !infiniteLoopProtector(error)) {
-        _consoleProxy.error('The handling of js-errors was disabled by the infinity-loop protector');
-        return null;
-      }
+        if (infiniteLoopProtector != null && !infiniteLoopProtector(error)) {
+          _consoleProxy.error('The handling of js-errors was disabled by the infinity-loop protector');
+          return null;
+        }
 
-      if (!preventDefault && isDevMode()) {
-        return null;
-      }
+        if (!preventDefault && isDevMode()) {
+          return null;
+        }
 
-      _handleJsError(error, loggingService, 'jsUnhandledErrorLogger');
-    });
+        _handleJsError(error, loggingService, 'jsUnhandledErrorLogger');
+      });
+    }
   }
 
   static void setLogLevelsFromUrl(LoggingService loggingService, {html.Window window}) {
@@ -128,6 +130,7 @@ class ConfigureLoggingForBrowser {
     List<LoggingHandler> customLoggingSavers,
     bool preventDefaultJsError: true,
     Protector jsInfiniteLoopProtector,
+    bool ignoreJsErrors: true,
   }) {
     loggingService
         .addLoggingPrinter(new LoggingPrinterForBrowser(shouldTerseErrorWhenPrint: shouldTerseErrorWhenPrint));
@@ -156,6 +159,7 @@ class ConfigureLoggingForBrowser {
       loggingService,
       preventDefault: preventDefaultJsError,
       infiniteLoopProtector: jsInfiniteLoopProtector,
+      ignoreJsErrors: ignoreJsErrors,
     );
     collectPreStartJsErrors(loggingService);
   }
