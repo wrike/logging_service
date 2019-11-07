@@ -48,11 +48,11 @@ class ConfigureLoggingForBrowser {
   }
 
   static void listenJsErrors(LoggingService loggingService,
-    {bool preventDefault: true, html.Window window, Protector infiniteLoopProtector, bool ignoreJsErrors}) {
+    {bool preventDefault: true, html.Window window, Protector infiniteLoopProtector, bool handleGlobalJsErrors}) {
     window = window ?? html.window;
     infiniteLoopProtector = infiniteLoopProtector ?? _defaultProtector;
 
-    if (!ignoreJsErrors) {
+    if (handleGlobalJsErrors) {
       window.onError.listen((html.Event error) {
         if (!RepeatProtector.shouldBeHandled(error)) {
           _consoleProxy.error('The handling of js-errors was disabled by the repeat-protector');
@@ -130,7 +130,7 @@ class ConfigureLoggingForBrowser {
     List<LoggingHandler> customLoggingSavers,
     bool preventDefaultJsError: true,
     Protector jsInfiniteLoopProtector,
-    bool ignoreJsErrors: true,
+    bool handleGlobalJsErrors: false,
   }) {
     loggingService
         .addLoggingPrinter(new LoggingPrinterForBrowser(shouldTerseErrorWhenPrint: shouldTerseErrorWhenPrint));
@@ -159,7 +159,7 @@ class ConfigureLoggingForBrowser {
       loggingService,
       preventDefault: preventDefaultJsError,
       infiniteLoopProtector: jsInfiniteLoopProtector,
-      ignoreJsErrors: ignoreJsErrors,
+      handleGlobalJsErrors: handleGlobalJsErrors,
     );
     collectPreStartJsErrors(loggingService);
   }
