@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.3.0
+- Add new option for enable/disable global handling js errors
+- Global handling of js errors is disabled by default now
+
 ## 3.2.5
 - Do not send empty exceptions to Sentry
 

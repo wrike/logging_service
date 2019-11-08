@@ -44,6 +44,7 @@ void configureJsToDartLogsWriter(LoggingService loggingService) {
           return arg as JsError;
         }
       }
+      return null;
     })();
 
     args = args.map<String>((dynamic arg) => isItJsObject(arg) ? jsonStringify(arg) : arg.toString()).toList();

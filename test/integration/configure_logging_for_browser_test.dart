@@ -134,4 +134,5 @@ void main() {
 
 class LoggingServiceMock extends Mock implements LoggingService {}
 
+//ignore: mismatched_getter_and_setter_types
 class WindowMock extends Mock implements html.Window {}
