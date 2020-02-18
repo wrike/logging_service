@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.4.0
+- Console output has been improved for `Additional info` section
+
 ## 3.3.0
 - Add new option for enable/disable global handling js errors
 - Global handling of js errors is disabled by default now
