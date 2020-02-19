@@ -91,16 +91,12 @@ class LoggingPrinterForBrowser {
       msg += '\n' + additionalInfo.join('\n');
     }
 
-    if (rec.level == log.Level.SEVERE) {
-      _consoleProxy.error(msg);
-    } else {
-      _consoleProxy.log(msg);
-    }
+    _printMessage(msg, rec.level);
 
     if (additionalInfo.isNotEmpty && !isDevMode()) {
       _consoleProxy.group('${rec.sequenceNumber}/${rec.level} Additional info:');
       for (var msg in additionalInfo) {
-        _consoleProxy.log(msg);
+        _printMessage(msg, rec.level);
       }
       _consoleProxy.groupEnd();
     }
@@ -117,4 +113,12 @@ class LoggingPrinterForBrowser {
   }
 
   String _makeHeaderString(String info) => '\n***** $info '.padRight(100, '*');
+
+  void _printMessage(String msg, log.Level level) {
+    if (level == log.Level.SEVERE) {
+      _consoleProxy.error(msg);
+    } else {
+      _consoleProxy.log(msg);
+    }
+  }
 }
