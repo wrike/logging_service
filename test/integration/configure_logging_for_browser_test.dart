@@ -23,7 +23,7 @@ void main() {
 
       windowMock = new WindowMock();
       when(windowMock.onError).thenAnswer((_) => onErrorStreamController.stream);
-      ConfigureLoggingForBrowser.listenJsErrors(loggingServiceMock, window: windowMock);
+      ConfigureLoggingForBrowser.listenJsErrors(loggingServiceMock, window: windowMock, handleGlobalJsErrors: true);
     });
 
     test('get the message from the error-event if it has the message field', () {

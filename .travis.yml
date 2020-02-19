@@ -6,7 +6,7 @@ matrix:
   include:
     - dart: dev
       script:
-        - dartanalyzer --fatal-infos --fatal-lints --fatal-warnings lib/ test/
+        - dartanalyzer --fatal-lints --fatal-warnings lib/ test/
     - dart: dev
       script:
         - dartfmt --set-exit-if-changed -l 120 -n .
@@ -18,7 +18,7 @@ matrix:
         test: --platform chrome
     - dart: stable
       script:
-        - dartanalyzer --fatal-infos --fatal-lints --fatal-warnings lib/ test/
+        - dartanalyzer --fatal-lints --fatal-warnings lib/ test/
     - dart: stable
       dart_task:
         test: --platform firefox -j 1
