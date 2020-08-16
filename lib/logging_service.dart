@@ -25,16 +25,22 @@ class LoggingService {
   }
 
   void handleLogRecord(log.LogRecord rec) {
-    if (rec.level >= _getLogLevelForModule(rec)) {
-      for (final printer in _loggingPrinters) {
-        printer(rec);
+    try
+    {
+      if (rec.level >= _getLogLevelForModule(rec)) {
+        for (final printer in _loggingPrinters) {
+          printer(rec);
+        }
+      }
+
+      if (rec.level >= _savableLogLevel && rec.level != log.Level.SHOUT) {
+        for (final saver in _loggingSavers) {
+          saver(rec);
+        }
       }
     }
-
-    if (rec.level >= _savableLogLevel && rec.level != log.Level.SHOUT) {
-      for (final saver in _loggingSavers) {
-        saver(rec);
-      }
+    catch (_) {
+      // ignore any errors
     }
   }
 
