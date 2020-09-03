@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.4.1
+- Added error handling to avoid looping
+
 ## 3.4.0
 - Console output has been improved for `Additional info` section
 
