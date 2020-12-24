@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.4.2
+- Bugfix: unhandled exception during pre-error handling
+
 ## 3.4.1
 - Added error handling to avoid looping
 
