@@ -28,24 +28,19 @@ class ConfigureLoggingForBrowser {
   static void collectPreStartJsErrors(LoggingService loggingService) {
     if (loggingServiceJsPreStartErrorsList != null) {
       for (final error in loggingServiceJsPreStartErrorsList) {
-        try {
-          if (error is! html.Event) {
-            loggingService.handleLogRecord(
-              new log.LogRecord(
-                log.Level.SEVERE,
-                'collectPreStartJsErrors: the error event has incorrect type: ${error.runtimeType}/${error.toString()}',
-                'jsPreStartUnhandledErrorLogger',
-                error,
-              ),
-            );
-            return null;
-          }
+        if (error is! html.Event) {
+          loggingService.handleLogRecord(
+            new log.LogRecord(
+              log.Level.SEVERE,
+              'collectPreStartJsErrors: the error event has incorrect type: ${error.runtimeType}/${error.toString()}',
+              'jsPreStartUnhandledErrorLogger',
+              error,
+            ),
+          );
+          return null;
+        }
 
-          _handleJsError(error as html.Event, loggingService, 'jsPreStartUnhandledErrorLogger');
-        }
-        on Error catch(e) {
-          print('ConfigureLoggingForBrowser.collectPreStartJsErrors catch exeption $e');
-        }
+        _handleJsError(error as html.Event, loggingService, 'jsPreStartUnhandledErrorLogger');
       }
       loggingServiceIsJsPreStartErrorSavingEnabled = false;
       loggingServiceJsPreStartErrorsList.clear();
