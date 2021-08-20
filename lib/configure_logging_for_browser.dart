@@ -136,6 +136,7 @@ class ConfigureLoggingForBrowser {
     bool preventDefaultJsError: true,
     Protector jsInfiniteLoopProtector,
     bool handleGlobalJsErrors: false,
+    bool handlePreStartJsErrors: true,
   }) {
     loggingService
         .addLoggingPrinter(new LoggingPrinterForBrowser(shouldTerseErrorWhenPrint: shouldTerseErrorWhenPrint));
@@ -166,7 +167,9 @@ class ConfigureLoggingForBrowser {
       infiniteLoopProtector: jsInfiniteLoopProtector,
       handleGlobalJsErrors: handleGlobalJsErrors,
     );
-    collectPreStartJsErrors(loggingService);
+    if (handlePreStartJsErrors) {
+      collectPreStartJsErrors(loggingService);
+    }
   }
 
   static void _handleJsError(html.Event errorEvent, LoggingService loggingService, String loggerName) {
