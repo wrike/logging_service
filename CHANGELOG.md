@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.4.2
+- Added parameter handlePreStartJsErrors to avoid collection pre start errors.
+
 ## 3.4.1
 - Added error handling to avoid looping
 
