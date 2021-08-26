@@ -1,5 +1,5 @@
 name: logging_service
-version: 3.4.2
+version: 3.4.3
 description: The service for advanced work with logging
 authors:
   - Ivan Evsikov <ivan.evsikov@team.wrike.com>
