@@ -32,7 +32,7 @@ class ConfigureLoggingForBrowser {
           loggingService.handleLogRecord(
             new log.LogRecord(
               log.Level.SEVERE,
-              'collectPreStartJsErrors: the error event has incorrect type: ${error.runtimeType}/${error.toString()}',
+              'collectPreStartJsErrors: the error event has incorrect type: ${error.toString()}',
               'jsPreStartUnhandledErrorLogger',
               error,
             ),
