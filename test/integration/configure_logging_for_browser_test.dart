@@ -130,9 +130,62 @@ void main() {
       verify(loggingServiceMock.handleLogRecord(captureAny)).called(1);
     });
   });
+
+  group('setLogLevelsFromUrl should', () {
+    WindowMock windowMock;
+    LocationMock location;
+    LoggingServiceMock loggingServiceMock;
+
+    setUp(() {
+      windowMock = new WindowMock();
+      location = new LocationMock();
+      loggingServiceMock = new LoggingServiceMock();
+
+      when(windowMock.location).thenReturn(location);
+    });
+
+    test('set level for single logger', () {
+      when(location.hash).thenReturn('#logging={"logger": "INFO"}');
+
+      ConfigureLoggingForBrowser.setLogLevelsFromUrl(loggingServiceMock, window: windowMock);
+
+      verify(loggingServiceMock.setLogLevelPerLogger('logger', log.Level.INFO));
+      verifyNoMoreInteractions(loggingServiceMock);
+    });
+
+    test('set levels for several loggers', () {
+      when(location.hash).thenReturn('#logging={"logger": "INFO", "logger2": "WARNING"}');
+
+      ConfigureLoggingForBrowser.setLogLevelsFromUrl(loggingServiceMock, window: windowMock);
+
+      verify(loggingServiceMock.setLogLevelPerLogger('logger', log.Level.INFO));
+      verify(loggingServiceMock.setLogLevelPerLogger('logger2', log.Level.WARNING));
+      verifyNoMoreInteractions(loggingServiceMock);
+    });
+
+    test('skip loggers with unknown levels', () {
+      when(location.hash).thenReturn('#logging={"logger": "INFO", "logger2": "UNKNOWN"}');
+
+      ConfigureLoggingForBrowser.setLogLevelsFromUrl(loggingServiceMock, window: windowMock);
+
+      verify(loggingServiceMock.setLogLevelPerLogger('logger', log.Level.INFO));
+      verifyNoMoreInteractions(loggingServiceMock);
+    });
+
+    test('extract logger configuration from hash with multiple params', () {
+      when(location.hash).thenReturn('#some_param=some_value&logging={"logger": "INFO"}');
+
+      ConfigureLoggingForBrowser.setLogLevelsFromUrl(loggingServiceMock, window: windowMock);
+
+      verify(loggingServiceMock.setLogLevelPerLogger('logger', log.Level.INFO));
+      verifyNoMoreInteractions(loggingServiceMock);
+    });
+  });
 }
 
 class LoggingServiceMock extends Mock implements LoggingService {}
 
 //ignore: mismatched_getter_and_setter_types
 class WindowMock extends Mock implements html.Window {}
+
+class LocationMock extends Mock implements html.Location {}
