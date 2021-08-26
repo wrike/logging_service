@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.4.3
+- Fix: unhandled exception during pre-error handling
+
 ## 3.4.2
 - Added parameter handlePreStartJsErrors to avoid collection pre start errors.
 
